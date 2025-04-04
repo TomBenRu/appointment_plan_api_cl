@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 from typing import List, Dict, Any, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Request, Depends, Query
+from fastapi import APIRouter, Request, Depends, Query, HTTPException
 from fastapi.responses import HTMLResponse
 from pony.orm import db_session
 
@@ -44,6 +44,15 @@ def get_calendar_data(year: int, month: int) -> List[List[Dict[str, Any]]]:
     
     return calendar_weeks
 
+def get_month_name(month: int) -> str:
+    """Gibt den deutschen Monatsnamen zurück."""
+    return {
+        1: "Januar", 2: "Februar", 3: "März", 
+        4: "April", 5: "Mai", 6: "Juni",
+        7: "Juli", 8: "August", 9: "September", 
+        10: "Oktober", 11: "November", 12: "Dezember"
+    }[month]
+
 
 @router.get("/", response_class=HTMLResponse)
 @db_session
@@ -81,7 +90,8 @@ def index(request: Request):
             "request": request,
             "calendar_weeks": calendar_weeks,
             "year": today.year,
-            "month": today.month
+            "month": today.month,
+            "month_name": get_month_name(today.month)
         }
     )
 
@@ -90,53 +100,57 @@ def index(request: Request):
 @db_session
 def calendar_partial(
     request: Request,
-    year: int = Query(...),
-    month: int = Query(...)
+    direction: str = Query(None, description="Richtung (prev/next)"),
+    year: int = Query(None, description="Jahr"),
+    month: int = Query(None, description="Monat (1-12)")
 ):
     """Liefert das Kalender-Partial für einen bestimmten Monat."""
+    # Wenn kein Jahr/Monat übergeben wurde, nehmen wir den aktuellen
+    if year is None or month is None:
+        today = date.today()
+        year = today.year
+        month = today.month
+    
+    # Monat basierend auf direction anpassen
+    if direction == "prev":
+        if month == 1:
+            year -= 1
+            month = 12
+        else:
+            month -= 1
+    elif direction == "next":
+        if month == 12:
+            year += 1
+            month = 1
+        else:
+            month += 1
+    
     # Kalenderdaten erstellen
     calendar_weeks = get_calendar_data(year, month)
     
-    # Termine für den Monat laden
+    # Termine laden und einfügen (wie bisher)
     start_date = calendar_weeks[0][0]["date"]
     end_date = calendar_weeks[-1][-1]["date"]
-    
-    # Termine aus der Datenbank laden
     appointments = list(DBAppointment.select(
         lambda a: a.date >= start_date and a.date <= end_date
     ))
     
-    # Termine in den Kalender einfügen
     for appointment in appointments:
-        # Pydantic-Schema erstellen und end_time_str hinzufügen
-        appointment_data = schemas.Appointment.model_validate(appointment)
-        
-        # In ein Wörterbuch konvertieren für die Verarbeitung im Template
-        try:
-            # Pydantic v2 verwendet model_dump() statt dict()
-            appointment_data_dict = appointment_data.model_dump()
-        except AttributeError:
-            # Fallback für ältere Pydantic-Versionen
-            appointment_data_dict = appointment_data.dict()
-        
-        # get_end_time_str Methode zum Dictionary hinzufügen
-        appointment_data_dict["get_end_time_str"] = appointment_data.get_end_time_str
-        
-        # Datum des Termins
-        appointment_date = appointment_data.date
-        
-        # Termin dem entsprechenden Tag zuordnen
+        appointment_data = schemas.AppointmentDetail.model_validate(appointment)
         for week in calendar_weeks:
             for day in week:
-                if day["date"] == appointment_date:
-                    day["appointments"].append(appointment_data_dict)
+                if day["date"] == appointment.date:
+                    day["appointments"].append(appointment_data)
     
     # Template rendern
     return templates.TemplateResponse(
         "calendar_partial.html",
         {
             "request": request,
-            "calendar_weeks": calendar_weeks
+            "calendar_weeks": calendar_weeks,
+            "year": year,
+            "month": month,
+            "month_name": get_month_name(month)  # Monatsnamen hinzufügen
         }
     )
 

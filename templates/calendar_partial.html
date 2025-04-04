@@ -1,5 +1,15 @@
-<!-- Wochentage -->
+<!-- OOB-Swaps für die versteckten Felder -->
+<input type="hidden" id="current-year" name="year" value="{{ year }}" hx-swap-oob="true">
+<input type="hidden" id="current-month" name="month" value="{{ month }}" hx-swap-oob="true">
+
+<!-- OOB-Swap für die Monatsanzeige -->
+<span id="month-display" class="px-4 py-2 font-semibold" hx-swap-oob="true">
+    {{ month_name }} {{ year }}
+</span>
+
+<!-- Hauptkalender-Container -->
 <div class="grid grid-cols-7 gap-4">
+    <!-- Wochentage -->
     <div class="text-center font-semibold">Mo</div>
     <div class="text-center font-semibold">Di</div>
     <div class="text-center font-semibold">Mi</div>

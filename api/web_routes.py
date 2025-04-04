@@ -67,17 +67,13 @@ def index(request: Request):
     
     # Termine in den Kalender einfügen
     for appointment in appointments:
-        # Pydantic-Schema erstellen und end_time_str hinzufügen
         appointment_data = schemas.AppointmentDetail.model_validate(appointment)
-        print(appointment_data)
         
         # Termin dem entsprechenden Tag zuordnen
         for week in calendar_weeks:
             for day in week:
                 if day["date"] == appointment.date:
                     day["appointments"].append(appointment_data)
-
-    pprint.pprint(calendar_weeks)
     
     # Template rendern
     return templates.TemplateResponse(

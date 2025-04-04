@@ -1,4 +1,4 @@
-from datetime import date, time, timedelta
+from datetime import datetime, date, time, timedelta
 from typing import List, Optional, Any
 from uuid import UUID
 
@@ -59,6 +59,11 @@ class AppointmentDetail(BaseModel):
     persons: List[Person]
     guests: list[str] = Field(default_factory=list)
     notes: str = ""
+
+    def get_end_time(self) -> time:
+        start_datetime = datetime.combine(self.date, self.start_time)
+        end_datetime = start_datetime + self.delta
+        return end_datetime.time()
 
 
 class Plan(BaseModel):

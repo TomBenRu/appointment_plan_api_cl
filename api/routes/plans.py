@@ -6,7 +6,6 @@ from pony.orm import db_session, select
 
 from api.models import schemas
 from database.models import Plan as DBPlan
-from api.routes.appointments import convert_to_appointment_schema  # Wir importieren die Funktion für AppointmentLinks
 
 router = APIRouter()
 
@@ -37,12 +36,5 @@ def get_plan(plan_id: UUID = Path(...)):
     
     # Beim PlanDetail müssen wir die Appointments mit end_time_str anreichern
     plan_detail = schemas.PlanDetail.model_validate(plan)
-    
-    # Füge end_time_str zu jedem Appointment hinzu
-    for i, appointment in enumerate(plan_detail.appointments):
-        # Der Einfachheit halber nehmen wir direkt die Originaldaten
-        db_appointment = plan.appointments[i]
-        appointment_with_end_time = convert_to_appointment_schema(db_appointment)
-        plan_detail.appointments[i] = appointment_with_end_time
     
     return plan_detail

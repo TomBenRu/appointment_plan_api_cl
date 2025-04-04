@@ -1,4 +1,5 @@
 import calendar
+import pprint
 from datetime import date, datetime, timedelta
 from typing import List, Dict, Any, Optional
 from uuid import UUID
@@ -62,31 +63,21 @@ def index(request: Request):
     appointments = list(DBAppointment.select(
         lambda a: a.date >= start_date and a.date <= end_date
     ))
+    print(f"Loaded {len(appointments)} appointments")
     
     # Termine in den Kalender einfügen
     for appointment in appointments:
         # Pydantic-Schema erstellen und end_time_str hinzufügen
-        appointment_data = schemas.Appointment.model_validate(appointment)
-        
-        # In ein Wörterbuch konvertieren für die Verarbeitung im Template
-        try:
-            # Pydantic v2 verwendet model_dump() statt dict()
-            appointment_data_dict = appointment_data.model_dump()
-        except AttributeError:
-            # Fallback für ältere Pydantic-Versionen
-            appointment_data_dict = appointment_data.dict()
-        
-        # get_end_time_str Methode zum Dictionary hinzufügen
-        appointment_data_dict["get_end_time_str"] = appointment_data.get_end_time_str
-        
-        # Datum des Termins
-        appointment_date = appointment_data.date
+        appointment_data = schemas.AppointmentDetail.model_validate(appointment)
+        print(appointment_data)
         
         # Termin dem entsprechenden Tag zuordnen
         for week in calendar_weeks:
             for day in week:
-                if day["date"] == appointment_date:
-                    day["appointments"].append(appointment_data_dict)
+                if day["date"] == appointment.date:
+                    day["appointments"].append(appointment_data)
+
+    pprint.pprint(calendar_weeks)
     
     # Template rendern
     return templates.TemplateResponse(

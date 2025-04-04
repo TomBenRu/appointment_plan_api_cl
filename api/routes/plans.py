@@ -19,7 +19,7 @@ def get_plans(plan_period_id: Optional[UUID] = None):
     query = select(p for p in DBPlan)
     
     if plan_period_id:
-        query = query.filter(lambda p: p.plan_period.uuid == str(plan_period_id))
+        query = query.filter(lambda p: p.plan_period.id == str(plan_period_id))
     
     plans = list(query)
     return [plan_to_schema(p) for p in plans]
@@ -31,7 +31,7 @@ def get_plan(plan_id: UUID = Path(...)):
     """
     Liefert Details zu einem bestimmten Plan.
     """
-    plan = DBPlan.get(uuid=str(plan_id))
+    plan = DBPlan.get(id=str(plan_id))
     if not plan:
         raise HTTPException(status_code=404, detail="Plan nicht gefunden")
     

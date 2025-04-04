@@ -26,7 +26,7 @@ def get_location(location_id: UUID = Path(...)):
     """
     Liefert Details zu einem bestimmten Arbeitsort.
     """
-    location = DBLocationOfWork.get(uuid=str(location_id))
+    location = DBLocationOfWork.get(id=str(location_id))
     if not location:
         raise HTTPException(status_code=404, detail="Arbeitsort nicht gefunden")
     

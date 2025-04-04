@@ -69,7 +69,13 @@ def index(request: Request):
         # Pydantic-Schema erstellen
         appointment_data = appointment_to_schema(appointment)
         # Location-Details hinzufügen
-        appointment_data_dict = appointment_data.dict()
+        try:
+            # Pydantic v2 verwendet model_dump() statt dict()
+            appointment_data_dict = appointment_data.model_dump()
+        except AttributeError:
+            # Fallback für ältere Pydantic-Versionen
+            appointment_data_dict = appointment_data.dict()
+        
         appointment_data_dict["location"] = location_to_detail_schema(appointment.location)
         
         # Datum des Termins
@@ -118,7 +124,13 @@ def calendar_partial(
         # Pydantic-Schema erstellen
         appointment_data = appointment_to_schema(appointment)
         # Location-Details hinzufügen
-        appointment_data_dict = appointment_data.dict()
+        try:
+            # Pydantic v2 verwendet model_dump() statt dict()
+            appointment_data_dict = appointment_data.model_dump()
+        except AttributeError:
+            # Fallback für ältere Pydantic-Versionen
+            appointment_data_dict = appointment_data.dict()
+            
         appointment_data_dict["location"] = location_to_detail_schema(appointment.location)
         
         # Datum des Termins

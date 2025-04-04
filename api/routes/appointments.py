@@ -7,9 +7,6 @@ from pony.orm import db_session, select
 
 from api.models import Appointment, AppointmentDetail
 from database.models import Appointment as DBAppointment
-from database.models import PlanPeriod as DBPlanPeriod
-from database.models import LocationOfWork as DBLocationOfWork
-from database.models import Person as DBPerson
 from api.utils.converters import appointment_to_schema, appointment_to_detail_schema
 
 router = APIRouter()
@@ -35,13 +32,13 @@ def get_appointments(
         query = query.filter(lambda a: a.date <= end_date)
     
     if location_id:
-        query = query.filter(lambda a: a.location.id == str(location_id))
+        query = query.filter(lambda a: a.location.uuid == str(location_id))
     
     if person_id:
-        query = query.filter(lambda a: str(person_id) in [p.id for p in a.persons])
+        query = query.filter(lambda a: str(person_id) in [p.uuid for p in a.persons])
     
     if plan_period_id:
-        query = query.filter(lambda a: a.plan_period.id == str(plan_period_id))
+        query = query.filter(lambda a: a.plan_period.uuid == str(plan_period_id))
     
     appointments = list(query)
     return [appointment_to_schema(a) for a in appointments]
@@ -53,7 +50,7 @@ def get_appointment(appointment_id: UUID = Path(...)):
     """
     Liefert Details zu einem bestimmten Termin.
     """
-    appointment = DBAppointment.get(id=str(appointment_id))
+    appointment = DBAppointment.get(uuid=str(appointment_id))
     if not appointment:
         raise HTTPException(status_code=404, detail="Termin nicht gefunden")
     

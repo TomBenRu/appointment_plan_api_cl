@@ -3,31 +3,31 @@ from uuid import UUID
 import json
 from typing import Optional, List
 
-from pony.orm import Database, Required, Optional as PonyOptional, Set, Json
+from pony.orm import Database, Required, Optional as PonyOptional, Set, Json, PrimaryKey
 
 db = Database()
 
 class Address(db.Entity):
-    id = Required(str, unique=True)  # UUID als String gespeichert
+    id = PrimaryKey(UUID, auto=True)
     street = Required(str)
     postal_code = Required(str)
     city = Required(str)
     locations = Set('LocationOfWork')
 
 class LocationOfWork(db.Entity):
-    id = Required(str, unique=True)  # UUID als String gespeichert
+    id = PrimaryKey(UUID, auto=True)
     name = Required(str)
     address = Required(Address)
     appointments = Set('Appointment')
 
 class Person(db.Entity):
-    id = Required(str, unique=True)  # UUID als String gespeichert
+    id = PrimaryKey(UUID, auto=True)
     name = Required(str)
     email = PonyOptional(str)
     appointments = Set('Appointment')
 
 class PlanPeriod(db.Entity):
-    id = Required(str, unique=True)  # UUID als String gespeichert
+    id = PrimaryKey(UUID, auto=True)
     name = Required(str)
     start_date = Required(date)
     end_date = Required(date)
@@ -35,7 +35,7 @@ class PlanPeriod(db.Entity):
     appointments = Set('Appointment')
 
 class Appointment(db.Entity):
-    id = Required(str, unique=True)  # UUID als String gespeichert
+    id = PrimaryKey(UUID, auto=True)
     plan_period = Required(PlanPeriod)
     date = Required(date)
     start_time = Required(str)  # Speichere als String im Format "HH:MM:SS"
@@ -47,7 +47,7 @@ class Appointment(db.Entity):
     plans = Set('Plan')
 
 class Plan(db.Entity):
-    id = Required(str, unique=True)  # UUID als String gespeichert
+    id = PrimaryKey(UUID, auto=True)
     name = Required(str)
     notes = PonyOptional(str, default="")
     plan_period = Required(PlanPeriod)

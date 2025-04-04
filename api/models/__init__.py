@@ -1,3 +1,5 @@
-from .schemas import Address, LocationOfWork, Person, PlanPeriod, Appointment, AppointmentDetail, Plan
+from .schemas import (Address, LocationOfWork, LocationOfWorkDetail, Person, PlanPeriod, Appointment, AppointmentDetail,
+                      Plan, PlanDetail)
 
-__all__ = ['Address', 'LocationOfWork', 'Person', 'PlanPeriod', 'Appointment', 'AppointmentDetail', 'Plan']
+__all__ = ['Address', 'LocationOfWork', 'LocationOfWorkDetail', 'Person', 'PlanPeriod', 'Appointment',
+           'AppointmentDetail', 'Plan', 'PlanDetail']

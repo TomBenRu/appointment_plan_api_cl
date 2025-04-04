@@ -1,3 +1,4 @@
+import contextlib
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,12 +18,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Event-Handler für Anwendungsstart
-@app.on_event("startup")
-def startup_event():
-    # Datenbank einrichten
+@contextlib.asynccontextmanager
+async def lifespan(app):
+    # Startup
     setup_database()
+    yield
+    # Shutdown
+    pass
 
+# Lifespan-Event-Handler zuweisen
+app.router.lifespan_context = lifespan
 
 if __name__ == "__main__":
     # Server starten mit Hot-Reload

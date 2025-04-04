@@ -2,44 +2,43 @@ from datetime import date, time, timedelta
 from typing import List, Optional, Any
 from uuid import UUID
 
-from pydantic import BaseModel, Json, Field, ConfigDict
+from pydantic import BaseModel, Json, Field
 
 
-class BaseSchema(BaseModel):
-    """Base class for all schemas."""
-    model_config = ConfigDict(from_attributes=True)
-
+class Address(BaseModel):
     id: UUID
-
-
-class Address(BaseSchema):
     street: str
     postal_code: str
     city: str
 
 
-class LocationOfWork(BaseSchema):
+class LocationOfWork(BaseModel):
+    id: UUID
     name: str
     address: UUID
 
 
-class LocationOfWorkDetail(BaseSchema):
+class LocationOfWorkDetail(BaseModel):
+    id: UUID
     name: str
     address: Address
 
 
-class Person(BaseSchema):
+class Person(BaseModel):
+    id: UUID
     name: str
     email: Optional[str] = None
 
 
-class PlanPeriod(BaseSchema):
+class PlanPeriod(BaseModel):
+    id: UUID
     name: str
     start_date: date
     end_date: date
 
 
-class Appointment(BaseSchema):
+class Appointment(BaseModel):
+    id: UUID
     plan_period_id: UUID
     date: date
     start_time: time
@@ -50,7 +49,7 @@ class Appointment(BaseSchema):
     notes: str = ""
 
 
-class AppointmentDetail(BaseSchema):
+class AppointmentDetail(BaseModel):
     id: UUID
     plan_period: PlanPeriod
     date: date
@@ -62,14 +61,16 @@ class AppointmentDetail(BaseSchema):
     notes: str = ""
 
 
-class Plan(BaseSchema):
+class Plan(BaseModel):
+    id: UUID
     name: str
     notes: str = ""
     plan_period_id: UUID
     appointment_ids: List[UUID]
 
 
-class PlanDetail(BaseSchema):
+class PlanDetail(BaseModel):
+    id: UUID
     name: str
     notes: str = ""
     plan_period: PlanPeriod

@@ -35,13 +35,13 @@ def get_appointments(
         query = query.filter(lambda a: a.date <= end_date)
     
     if location_id:
-        query = query.filter(lambda a: a.location.id == str(location_id))
+        query = query.filter(lambda a: a.location.id == location_id)
     
     if person_id:
-        query = query.filter(lambda a: str(person_id) in [p.id for p in a.persons])
+        query = query.filter(lambda a: person_id in [p.id for p in a.persons])
     
     if plan_period_id:
-        query = query.filter(lambda a: a.plan_period.id == str(plan_period_id))
+        query = query.filter(lambda a: a.plan_period.id == plan_period_id)
     
     appointments = list(query)
     return [appointment_to_schema(a) for a in appointments]
@@ -53,7 +53,7 @@ def get_appointment(appointment_id: UUID = Path(...)):
     """
     Liefert Details zu einem bestimmten Termin.
     """
-    appointment = DBAppointment.get(id=str(appointment_id))
+    appointment = DBAppointment.get(id=appointment_id)
     if not appointment:
         raise HTTPException(status_code=404, detail="Termin nicht gefunden")
     

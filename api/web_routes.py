@@ -10,7 +10,7 @@ from pony.orm import db_session
 from api.models import schemas
 from database.models import Appointment as DBAppointment
 from api import templates
-from api.routes.appointments import add_end_time_str
+from api.routes.appointments import convert_to_appointment_schema
 
 router = APIRouter()
 
@@ -67,7 +67,7 @@ def index(request: Request):
     # Termine in den Kalender einfügen
     for appointment in appointments:
         # Pydantic-Schema erstellen und end_time_str hinzufügen
-        appointment_data = add_end_time_str(appointment)
+        appointment_data = convert_to_appointment_schema(appointment)
         
         # In ein Wörterbuch konvertieren für die Verarbeitung im Template
         try:
@@ -77,8 +77,8 @@ def index(request: Request):
             # Fallback für ältere Pydantic-Versionen
             appointment_data_dict = appointment_data.dict()
         
-        # end_time_str aus dem Objekt in das Dictionary übertragen
-        appointment_data_dict["end_time_str"] = appointment_data.end_time_str
+        # get_end_time_str Methode zum Dictionary hinzufügen
+        appointment_data_dict["get_end_time_str"] = appointment_data.get_end_time_str
         
         # Datum des Termins
         appointment_date = appointment_data.date
@@ -124,7 +124,7 @@ def calendar_partial(
     # Termine in den Kalender einfügen
     for appointment in appointments:
         # Pydantic-Schema erstellen und end_time_str hinzufügen
-        appointment_data = add_end_time_str(appointment)
+        appointment_data = convert_to_appointment_schema(appointment)
         
         # In ein Wörterbuch konvertieren für die Verarbeitung im Template
         try:
@@ -134,8 +134,8 @@ def calendar_partial(
             # Fallback für ältere Pydantic-Versionen
             appointment_data_dict = appointment_data.dict()
         
-        # end_time_str aus dem Objekt in das Dictionary übertragen
-        appointment_data_dict["end_time_str"] = appointment_data.end_time_str
+        # get_end_time_str Methode zum Dictionary hinzufügen
+        appointment_data_dict["get_end_time_str"] = appointment_data.get_end_time_str
         
         # Datum des Termins
         appointment_date = appointment_data.date

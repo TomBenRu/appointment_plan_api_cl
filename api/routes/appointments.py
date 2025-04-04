@@ -14,59 +14,13 @@ from database.models import Person as DBPerson
 router = APIRouter()
 
 
-def add_end_time_str(appointment: DBAppointment):
-    """Fügt ein end_time_str Attribut zum Appointment-Objekt hinzu"""
-    # Zeit-String in time-Objekt umwandeln
-    start_time_parts = appointment.start_time.split(":")
-    hours = int(start_time_parts[0])
-    minutes = int(start_time_parts[1])
-    seconds = int(start_time_parts[2]) if len(start_time_parts) > 2 else 0
-    
-    # Create a dummy datetime to perform the calculation
-    base_date = date(2000, 1, 1)
-    start_datetime = datetime(
-        year=base_date.year,
-        month=base_date.month,
-        day=base_date.day,
-        hour=hours,
-        minute=minutes,
-        second=seconds
-    )
-    
-    # Add the delta
-    end_datetime = start_datetime + timedelta(seconds=appointment.delta)
-    
-    # Set the end_time_str attribute
-    appointment_obj = schemas.Appointment.model_validate(appointment)
-    appointment_obj.end_time_str = end_datetime.strftime("%H:%M")
-    return appointment_obj
+def convert_to_appointment_schema(appointment: DBAppointment) -> schemas.Appointment:
+    """Konvertiert ein DBAppointment in ein schemas.Appointment"""
+    return schemas.Appointment.model_validate(appointment)
 
-def add_end_time_str_detail(appointment):
-    """Fügt ein end_time_str Attribut zum AppointmentDetail-Objekt hinzu"""
-    # Zeit-String in time-Objekt umwandeln
-    start_time_parts = appointment.start_time.split(":")
-    hours = int(start_time_parts[0])
-    minutes = int(start_time_parts[1])
-    seconds = int(start_time_parts[2]) if len(start_time_parts) > 2 else 0
-    
-    # Create a dummy datetime to perform the calculation
-    base_date = date(2000, 1, 1)
-    start_datetime = datetime(
-        year=base_date.year,
-        month=base_date.month,
-        day=base_date.day,
-        hour=hours,
-        minute=minutes,
-        second=seconds
-    )
-    
-    # Add the delta
-    end_datetime = start_datetime + timedelta(seconds=appointment.delta)
-    
-    # Convert to AppointmentDetail schema
-    appointment_obj = schemas.AppointmentDetail.model_validate(appointment)
-    appointment_obj.end_time_str = end_datetime.strftime("%H:%M")
-    return appointment_obj
+def convert_to_appointment_detail_schema(appointment: DBAppointment) -> schemas.AppointmentDetail:
+    """Konvertiert ein DBAppointment in ein schemas.AppointmentDetail"""
+    return schemas.AppointmentDetail.model_validate(appointment)
 
 @router.get("/", response_model=List[schemas.Appointment])
 @db_session
@@ -98,7 +52,7 @@ def get_appointments(
         query = query.filter(lambda a: a.plan_period.id == plan_period_id)
     
     appointments = list(query)
-    return [add_end_time_str(a) for a in appointments]
+    return [convert_to_appointment_schema(a) for a in appointments]
 
 
 @router.get("/{appointment_id}", response_model=schemas.AppointmentDetail)
@@ -111,7 +65,7 @@ def get_appointment(appointment_id: UUID = Path(...)):
     if not appointment:
         raise HTTPException(status_code=404, detail="Termin nicht gefunden")
     
-    return add_end_time_str_detail(appointment)
+    return convert_to_appointment_detail_schema(appointment)
 
 
 @router.get("/by-date/{date_str}", response_model=List[schemas.Appointment])
@@ -130,7 +84,7 @@ def get_appointments_by_date(date_str: str = Path(...)):
         )
     
     appointments = list(DBAppointment.select(lambda a: a.date == appointment_date))
-    return [add_end_time_str(a) for a in appointments]
+    return [convert_to_appointment_schema(a) for a in appointments]
 
 
 @router.get("/by-month/{year}/{month}", response_model=List[schemas.Appointment])
@@ -160,4 +114,4 @@ def get_appointments_by_month(year: int = Path(...), month: int = Path(...)):
         lambda a: a.date >= start_date and a.date <= end_date
     ))
     
-    return [add_end_time_str(a) for a in appointments]
+    return [convert_to_appointment_schema(a) for a in appointments]

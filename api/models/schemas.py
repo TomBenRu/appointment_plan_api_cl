@@ -47,13 +47,13 @@ class Appointment(BaseModel):
     person_ids: List[UUID]
     guests: list[str] = Field(default_factory=list)
     notes: str = ""
-
+    
     def get_end_time(self) -> time:
         """Gibt die Endzeit als time-Objekt zurück"""
         start_datetime = datetime.combine(self.date, self.start_time)
         end_datetime = start_datetime + self.delta
         return end_datetime.time()
-
+    
     def get_end_time_str(self) -> str:
         """Gibt die Endzeit als String in HH:MM Format zurück"""
         return self.get_end_time().strftime("%H:%M")

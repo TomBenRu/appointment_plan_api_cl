@@ -63,7 +63,6 @@ def index(request: Request):
     appointments = list(DBAppointment.select(
         lambda a: a.date >= start_date and a.date <= end_date
     ))
-    print(f"Loaded {len(appointments)} appointments")
     
     # Termine in den Kalender einfügen
     for appointment in appointments:

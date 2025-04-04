@@ -14,14 +14,6 @@ from database.models import Person as DBPerson
 router = APIRouter()
 
 
-def convert_to_appointment_schema(appointment: DBAppointment) -> schemas.Appointment:
-    """Konvertiert ein DBAppointment in ein schemas.Appointment"""
-    return schemas.Appointment.model_validate(appointment)
-
-def convert_to_appointment_detail_schema(appointment: DBAppointment) -> schemas.AppointmentDetail:
-    """Konvertiert ein DBAppointment in ein schemas.AppointmentDetail"""
-    return schemas.AppointmentDetail.model_validate(appointment)
-
 @router.get("/", response_model=List[schemas.Appointment])
 @db_session
 def get_appointments(
@@ -52,7 +44,7 @@ def get_appointments(
         query = query.filter(lambda a: a.plan_period.id == plan_period_id)
     
     appointments = list(query)
-    return [convert_to_appointment_schema(a) for a in appointments]
+    return [schemas.Appointment.model_validate(a) for a in appointments]
 
 
 @router.get("/{appointment_id}", response_model=schemas.AppointmentDetail)
@@ -65,7 +57,7 @@ def get_appointment(appointment_id: UUID = Path(...)):
     if not appointment:
         raise HTTPException(status_code=404, detail="Termin nicht gefunden")
     
-    return convert_to_appointment_detail_schema(appointment)
+    return schemas.AppointmentDetail.model_validate(appointment)
 
 
 @router.get("/by-date/{date_str}", response_model=List[schemas.Appointment])
@@ -84,7 +76,7 @@ def get_appointments_by_date(date_str: str = Path(...)):
         )
     
     appointments = list(DBAppointment.select(lambda a: a.date == appointment_date))
-    return [convert_to_appointment_schema(a) for a in appointments]
+    return [schemas.Appointment.model_validate(a) for a in appointments]
 
 
 @router.get("/by-month/{year}/{month}", response_model=List[schemas.Appointment])
@@ -114,4 +106,4 @@ def get_appointments_by_month(year: int = Path(...), month: int = Path(...)):
         lambda a: a.date >= start_date and a.date <= end_date
     ))
     
-    return [convert_to_appointment_schema(a) for a in appointments]
+    return [schemas.Appointment.model_validate(a) for a in appointments]

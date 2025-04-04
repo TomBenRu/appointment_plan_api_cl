@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Pläne - Terminplanung{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Pläne</h1>
+    
+    <div class="mt-6" id="plans-container">
+        <!-- Hier werden die Pläne geladen -->
+        <div class="space-y-4">
+            {% for plan in plans %}
+                <div class="border rounded p-4">
+                    <h2 class="text-xl font-semibold mb-2">{{ plan.name }}</h2>
+                    <p class="text-gray-600">{{ plan.notes }}</p>
+                    <div class="mt-2">
+                        <span class="text-sm text-gray-500">Planperiode: {{ plan.plan_period.name }}</span>
+                    </div>
+                    <div class="mt-4">
+                        <a href="/plans/{{ plan.id }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            Details anzeigen
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center text-gray-500 py-8">
+                    <p>Keine Pläne gefunden.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

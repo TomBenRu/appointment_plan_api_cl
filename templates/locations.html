@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Arbeitsorte - Terminplanung{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Arbeitsorte</h1>
+    
+    <div class="mt-6" id="locations-container">
+        <!-- Hier werden die Arbeitsorte geladen -->
+        <div class="space-y-4">
+            {% for location in locations %}
+                <div class="border rounded p-4">
+                    <h2 class="text-xl font-semibold mb-2">{{ location.name }}</h2>
+                    <div class="mt-2">
+                        <p class="text-gray-600">{{ location.address.street }}, {{ location.address.postal_code }} {{ location.address.city }}</p>
+                    </div>
+                    <div class="mt-4">
+                        <a href="/locations/{{ location.id }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            Details anzeigen
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center text-gray-500 py-8">
+                    <p>Keine Arbeitsorte gefunden.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

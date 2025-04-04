@@ -1,0 +1,43 @@
+/* Zusätzliche benutzerdefinierte Styles */
+
+/* Kalender-Styles */
+.calendar-day {
+    transition: all 0.2s ease-in-out;
+}
+
+.calendar-day:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.calendar-appointment {
+    transition: all 0.2s ease-in-out;
+}
+
+.calendar-appointment:hover {
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+/* Animation für Seitenwechsel */
+.page-transition {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 768px) {
+    .calendar-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}

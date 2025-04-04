@@ -1,3 +1,4 @@
+import datetime
 from datetime import date, time, timedelta
 from uuid import UUID
 import json
@@ -38,8 +39,8 @@ class Appointment(db.Entity):
     id = PrimaryKey(UUID, auto=True)
     plan_period = Required(PlanPeriod)
     date = Required(date)
-    start_time = Required(str)  # Speichere als String im Format "HH:MM:SS"
-    delta = Required(int)  # Speichere als Sekunden
+    start_time = Required(datetime.time)  # Speichere als String im Format "HH:MM:SS"
+    delta = Required(datetime.timedelta)  # Speichere als Sekunden
     location = Required(LocationOfWork)
     persons = Set(Person)
     guests = Required(Json, default=[])

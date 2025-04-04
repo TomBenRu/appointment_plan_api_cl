@@ -7,10 +7,10 @@ from fastapi import APIRouter, Request, Depends, Query
 from fastapi.responses import HTMLResponse
 from pony.orm import db_session
 
-from api.models import Appointment
+from api.models import schemas
 from database.models import Appointment as DBAppointment
-from api.utils.converters import appointment_to_schema, location_to_detail_schema
 from api import templates
+from api.routes.appointments import add_end_time_str
 
 router = APIRouter()
 
@@ -66,9 +66,10 @@ def index(request: Request):
     
     # Termine in den Kalender einfügen
     for appointment in appointments:
-        # Pydantic-Schema erstellen
-        appointment_data = appointment_to_schema(appointment)
-        # Location-Details hinzufügen
+        # Pydantic-Schema erstellen und end_time_str hinzufügen
+        appointment_data = add_end_time_str(appointment)
+        
+        # In ein Wörterbuch konvertieren für die Verarbeitung im Template
         try:
             # Pydantic v2 verwendet model_dump() statt dict()
             appointment_data_dict = appointment_data.model_dump()
@@ -76,7 +77,8 @@ def index(request: Request):
             # Fallback für ältere Pydantic-Versionen
             appointment_data_dict = appointment_data.dict()
         
-        appointment_data_dict["location"] = location_to_detail_schema(appointment.location)
+        # end_time_str aus dem Objekt in das Dictionary übertragen
+        appointment_data_dict["end_time_str"] = appointment_data.end_time_str
         
         # Datum des Termins
         appointment_date = appointment_data.date
@@ -121,17 +123,19 @@ def calendar_partial(
     
     # Termine in den Kalender einfügen
     for appointment in appointments:
-        # Pydantic-Schema erstellen
-        appointment_data = appointment_to_schema(appointment)
-        # Location-Details hinzufügen
+        # Pydantic-Schema erstellen und end_time_str hinzufügen
+        appointment_data = add_end_time_str(appointment)
+        
+        # In ein Wörterbuch konvertieren für die Verarbeitung im Template
         try:
             # Pydantic v2 verwendet model_dump() statt dict()
             appointment_data_dict = appointment_data.model_dump()
         except AttributeError:
             # Fallback für ältere Pydantic-Versionen
             appointment_data_dict = appointment_data.dict()
-            
-        appointment_data_dict["location"] = location_to_detail_schema(appointment.location)
+        
+        # end_time_str aus dem Objekt in das Dictionary übertragen
+        appointment_data_dict["end_time_str"] = appointment_data.end_time_str
         
         # Datum des Termins
         appointment_date = appointment_data.date

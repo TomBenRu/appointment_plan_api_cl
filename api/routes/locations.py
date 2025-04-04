@@ -4,23 +4,22 @@ from uuid import UUID
 from fastapi import APIRouter, Path, HTTPException
 from pony.orm import db_session, select
 
-from api.models import LocationOfWork, LocationOfWorkDetail
+from api.models import schemas
 from database.models import LocationOfWork as DBLocationOfWork
-from api.utils.converters import location_to_schema, location_to_detail_schema
 
 router = APIRouter()
 
-@router.get("/", response_model=List[LocationOfWork])
+@router.get("/", response_model=List[schemas.LocationOfWork])
 @db_session
 def get_locations():
     """
     Liefert eine Liste aller Arbeitsorte.
     """
     locations = list(select(l for l in DBLocationOfWork))
-    return [location_to_schema(l) for l in locations]
+    return [schemas.LocationOfWork.model_validate(l) for l in locations]
 
 
-@router.get("/{location_id}", response_model=LocationOfWorkDetail)
+@router.get("/{location_id}", response_model=schemas.LocationOfWorkDetail)
 @db_session
 def get_location(location_id: UUID = Path(...)):
     """
@@ -30,4 +29,4 @@ def get_location(location_id: UUID = Path(...)):
     if not location:
         raise HTTPException(status_code=404, detail="Arbeitsort nicht gefunden")
     
-    return location_to_detail_schema(location)
+    return schemas.LocationOfWorkDetail.model_validate(location)

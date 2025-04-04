@@ -25,7 +25,7 @@
                 <div class="mt-2 space-y-1">
                     {% for appointment in day.appointments %}
                         <div class="p-1 text-xs bg-blue-100 text-blue-800 rounded">
-                            <div>{{ appointment.start_time.strftime('%H:%M') }} - {{ appointment.end_time.strftime('%H:%M') }}</div>
+                            <div>{{ appointment.start_time.strftime('%H:%M') }} - {{ appointment.end_time_str }}</div>
                             <div>{{ appointment.location.name }}</div>
                         </div>
                     {% endfor %}

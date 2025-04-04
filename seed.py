@@ -170,10 +170,11 @@ def seed_database():
     print("Erstelle Termine...")
     
     # Liste von möglichen Startzeiten
-    start_times = ["09:00:00", "10:30:00", "13:00:00", "14:30:00", "16:00:00"]
+    start_times = [datetime.time(9, 0), datetime.time(10, 30),
+                   datetime.time(13, 0), datetime.time(14, 30), datetime.time(16, 0)]
     
     # Liste von möglichen Dauern (in Sekunden)
-    durations = [3600, 5400, 7200]  # 1h, 1.5h, 2h
+    durations = [datetime.timedelta(seconds=3600), datetime.timedelta(seconds=5400), datetime.timedelta(seconds=7200)]
     
     # Aktuelle Termine erstellen (für die aktuelle Planungsperiode)
     for i in range(15):  # 15 Termine für den aktuellen Monat
@@ -187,8 +188,8 @@ def seed_database():
             continue
         
         # Zufällige Startzeit und Dauer
-        start_time = random.choice(start_times)
-        duration = random.choice(durations)
+        start_time: datetime.time = random.choice(start_times)
+        duration: datetime.timedelta = random.choice(durations)
         
         # Zufällige Teilnehmer (1-3 Personen)
         num_participants = random.randint(1, 3)

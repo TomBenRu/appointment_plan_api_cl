@@ -1,22 +1,62 @@
+/* Globale Farbvariablen für konsistentes Theming */
+:root {
+    /* Dunkle Farbtöne */
+    --dark-900: #121212;
+    --dark-800: #1E1E1E;
+    --dark-700: #2D2D2D;
+    --dark-600: #383838;
+    --dark-500: #494949;
+    --dark-400: #5A5A5A;
+    
+    /* Primärfarben (Lila) */
+    --primary-900: #4E1184;
+    --primary-800: #5D14A0;
+    --primary-700: #6C18BB;
+    --primary-600: #7B1CD7;
+    --primary-500: #8A20F2;
+    --primary-400: #9F4CF5;
+    --primary-300: #B378F7;
+    --primary-200: #C8A4F9;
+    --primary-100: #DCCFFB;
+    
+    /* Akzentfarben (Blau) */
+    --accent-900: #095166;
+    --accent-800: #0B6581;
+    --accent-700: #0D7A9D;
+    --accent-600: #0F8FB8;
+    --accent-500: #11A3D4;
+    --accent-400: #3EB3DB;
+    --accent-300: #6CC3E3;
+    --accent-200: #99D3EA;
+    --accent-100: #C7E3F2;
+}
+
 /* Zusätzliche benutzerdefinierte Styles */
 
 /* Kalender-Styles */
 .calendar-day {
     transition: all 0.2s ease-in-out;
+    background-color: var(--dark-700);
+    border-color: var(--dark-600);
 }
 
 .calendar-day:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
+    background-color: var(--dark-600);
 }
 
 .calendar-appointment {
     transition: all 0.2s ease-in-out;
+    background-color: var(--primary-900);
+    border-color: var(--primary-800);
+    color: var(--primary-100);
 }
 
 .calendar-appointment:hover {
     transform: scale(1.05);
     z-index: 10;
+    background-color: var(--primary-800);
 }
 
 /* Animation für Seitenwechsel */
@@ -33,6 +73,27 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Custom Utility-Klassen */
+.text-primary {
+    color: var(--primary-300);
+}
+
+.bg-primary {
+    background-color: var(--primary-600);
+}
+
+.border-primary {
+    border-color: var(--primary-700);
+}
+
+.text-accent {
+    color: var(--accent-300);
+}
+
+.bg-accent {
+    background-color: var(--accent-600);
 }
 
 /* Responsive Anpassungen */

@@ -13,18 +13,23 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Externe Tailwind-Konfiguration -->
+    <script src="/static/js/tailwind-config.js"></script>
+    
+    <!-- Eigene Styles -->
+    <link rel="stylesheet" href="/static/css/styles.css">
     
     {% block head %}{% endblock %}
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <header class="bg-blue-600 text-white shadow-md">
+<body class="bg-dark-900 text-gray-100 min-h-screen">
+    <header class="bg-dark-800 border-b border-primary-700 shadow-lg">
         <div class="container mx-auto px-4 py-4">
             <nav class="flex items-center justify-between">
-                <a href="/" class="text-2xl font-bold">Terminplanung</a>
+                <a href="/" class="text-2xl font-bold text-primary-300">Terminplanung</a>
                 <div>
-                    <a href="/" class="px-4 py-2 hover:bg-blue-700 rounded">Kalender</a>
-                    <a href="/plans" class="px-4 py-2 hover:bg-blue-700 rounded">Pläne</a>
-                    <a href="/locations" class="px-4 py-2 hover:bg-blue-700 rounded">Arbeitsorte</a>
+                    <a href="/" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Kalender</a>
+                    <a href="/plans" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Pläne</a>
+                    <a href="/locations" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Arbeitsorte</a>
                 </div>
             </nav>
         </div>
@@ -34,7 +39,7 @@
         {% block content %}{% endblock %}
     </main>
     
-    <footer class="bg-gray-800 text-white py-4 mt-8">
+    <footer class="bg-dark-800 text-gray-400 py-4 mt-8 border-t border-dark-600">
         <div class="container mx-auto px-4 text-center">
             <p>&copy; {% block year %}2023{% endblock %} Terminplanungs-Webseite</p>
         </div>

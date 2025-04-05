@@ -228,21 +228,30 @@ def location_detail(request: Request, location_id: UUID):
     """Detailseite für einen Arbeitsort."""
     from database.models import LocationOfWork as DBLocationOfWork
     from database.models import Appointment as DBAppointment
-    from datetime import date
+    from datetime import date, timedelta
     
     # Arbeitsort aus der Datenbank laden
     location = DBLocationOfWork.get(id=location_id)
     if not location:
         raise HTTPException(status_code=404, detail="Arbeitsort nicht gefunden")
     
-    # Zukünftige Termine für diesen Ort laden
+    # Aktuelles Datum
     today = date.today()
+    
+    # Zukünftige Termine für diesen Ort laden
     future_appointments = DBAppointment.select(
         lambda a: a.location.id == location_id and a.date >= today
     ).order_by(lambda a: (a.date, a.start_time))
+    
+    # Vergangene Termine für diesen Ort laden (letzte 30 Tage)
+    past_date = today - timedelta(days=30)
+    past_appointments = DBAppointment.select(
+        lambda a: a.location.id == location_id and a.date < today and a.date >= past_date
+    ).order_by(lambda a: (desc(a.date), a.start_time))  # Absteigend, neueste zuerst
 
     location_detail = schemas.LocationOfWorkDetail.model_validate(location)
-    appointments_data = [schemas.AppointmentDetail.model_validate(a) for a in future_appointments]
+    future_appointments_data = [schemas.AppointmentDetail.model_validate(a) for a in future_appointments]
+    past_appointments_data = [schemas.AppointmentDetail.model_validate(a) for a in past_appointments]
     
     # Template rendern
     return templates.TemplateResponse(
@@ -250,7 +259,8 @@ def location_detail(request: Request, location_id: UUID):
         {
             "request": request,
             "location": location_detail,
-            "appointments": appointments_data
+            "future_appointments": future_appointments_data,
+            "past_appointments": past_appointments_data
         }
     )
 

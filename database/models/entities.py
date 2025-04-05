@@ -48,11 +48,6 @@ class Appointment(db.Entity):
     notes = PonyOptional(str)
     plans = Set('Plan')
 
-    def get_end_time(self):
-        start_datetime = datetime.datetime.combine(self.date, self.start_time)
-        end_datetime = start_datetime + self.delta
-        return end_datetime.time()
-
 class Plan(db.Entity):
     id = PrimaryKey(UUID, auto=True)
     name = Required(str)

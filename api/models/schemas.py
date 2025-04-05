@@ -88,6 +88,11 @@ class AppointmentDetail(BaseSchema):
         return end_datetime.time()
 
     @property
+    def date_str(self) -> str:
+        """Gibt das Datum als String im Format DD.MM.YYYY zurück"""
+        return self.date.strftime("%d.%m.%Y")
+
+    @property
     def end_time_str(self) -> str:
         """Gibt die Endzeit als String in HH:MM Format zurück"""
         return self.get_end_time().strftime("%H:%M")
@@ -113,4 +118,8 @@ class PlanDetail(BaseSchema):
     name: str
     notes: str = ""
     plan_period: PlanPeriod
-    appointments: List[Appointment]
+    appointments: List[AppointmentDetail]
+
+    @field_validator('appointments')
+    def set_to_list(cls, v):
+        return list(v)

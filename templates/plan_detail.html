@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}{{ plan.name }} - Terminplanung{% endblock %}
+
+{% block content %}
+<div class="bg-dark-800 rounded-xl shadow-2xl p-8 text-gray-100 border border-dark-600">
+    <div class="mb-6 flex justify-between items-center">
+        <div class="flex items-center">
+            <a href="/plans" class="mr-4 text-primary-300 hover:text-primary-200 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+            </a>
+            <h1 class="text-3xl font-bold text-primary-300">{{ plan.name }}</h1>
+        </div>
+        <span class="bg-primary-900 text-primary-100 px-4 py-2 rounded-lg text-sm font-medium">
+            {{ plan.plan_period.name }}
+        </span>
+    </div>
+    
+    {% if plan.notes %}
+    <div class="bg-dark-700 rounded-lg p-4 mb-8 border border-dark-600">
+        <h2 class="text-lg font-semibold mb-2 text-primary-200">Notizen</h2>
+        <p class="text-gray-300">{{ plan.notes }}</p>
+    </div>
+    {% endif %}
+    
+    <h2 class="text-2xl font-semibold mb-4 text-primary-200 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Termine
+    </h2>
+    
+    <div class="space-y-4">
+        {% for appointment in plan.appointments %}
+            <div class="bg-dark-700 rounded-lg p-4 border border-dark-600 hover:bg-dark-600 transition-all duration-200">
+                <div class="flex flex-wrap justify-between items-start">
+                    <div class="mb-3">
+                        <div class="text-lg font-semibold text-primary-200">
+                            {{ appointment.date_str }} | {{ appointment.start_time_str }} - {{ appointment.end_time_str }}
+                        </div>
+                        <div class="text-primary-300 mt-1">{{ appointment.location.name }}</div>
+                    </div>
+                    
+                    <div class="bg-primary-900 px-3 py-1 rounded text-xs text-primary-100">
+                        Dauer: {{ (appointment.delta.total_seconds() / 60)|int }} Minuten
+                    </div>
+                </div>
+                
+                {% if appointment.persons %}
+                <div class="mt-3">
+                    <div class="text-sm font-medium text-gray-400 mb-1">Teilnehmer:</div>
+                    <div class="flex flex-wrap gap-2">
+                        {% for person in appointment.persons %}
+                            <span class="bg-dark-600 text-primary-200 px-2 py-1 rounded text-xs">
+                                {{ person.full_name }}
+                            </span>
+                        {% endfor %}
+                        
+                        {% for guest in appointment.guests %}
+                            <span class="bg-dark-600 text-gray-400 px-2 py-1 rounded text-xs italic">
+                                {{ guest }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if appointment.notes %}
+                <div class="mt-3 text-sm text-gray-300 border-t border-dark-600 pt-2">
+                    {{ appointment.notes }}
+                </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="text-center text-gray-400 py-10 bg-dark-700 rounded-lg border border-dark-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p>Keine Termine in diesem Plan.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -156,18 +156,165 @@ def calendar_partial(
 
 
 @router.get("/plans", response_class=HTMLResponse)
+@db_session
 def plans(request: Request):
     """Seite mit Plänen."""
+    from database.models import Plan as DBPlan
+    from database.models import PlanPeriod as DBPlanPeriod
+    
+    # Alle Pläne aus der Datenbank laden und nach Planperiode gruppieren
+    all_plans = DBPlan.select().order_by(lambda p: p.plan_period.start_date)
+    plans_data = [schemas.PlanDetail.model_validate(p) for p in all_plans]
+    
+    # Template rendern
     return templates.TemplateResponse(
         "plans.html",
-        {"request": request}
+        {
+            "request": request,
+            "plans": plans_data
+        }
+    )
+
+
+@router.get("/plans/{plan_id}", response_class=HTMLResponse)
+@db_session
+def plan_detail(request: Request, plan_id: UUID):
+    """Detailseite für einen Plan."""
+    from database.models import Plan as DBPlan
+    
+    # Plan aus der Datenbank laden
+    plan = DBPlan.get(id=plan_id)
+
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan nicht gefunden")
+
+    plan_detail = schemas.PlanDetail.model_validate(plan)
+    for appointment in plan_detail.appointments:
+        print(appointment.date_str)
+
+    # Template rendern
+    return templates.TemplateResponse(
+        "plan_detail.html",
+        {
+            "request": request,
+            "plan": plan_detail
+        }
     )
 
 
 @router.get("/locations", response_class=HTMLResponse)
+@db_session
 def locations(request: Request):
     """Seite mit Arbeitsorten."""
+    from database.models import LocationOfWork as DBLocationOfWork
+    
+    # Alle Arbeitsorte aus der Datenbank laden
+    all_locations = DBLocationOfWork.select().order_by(lambda l: l.name)
+
+    locations_data = [schemas.LocationOfWorkDetail.model_validate(l) for l in all_locations]
+    
+    # Template rendern
     return templates.TemplateResponse(
         "locations.html",
-        {"request": request}
+        {
+            "request": request,
+            "locations": locations_data
+        }
+    )
+
+
+@router.get("/locations/{location_id}", response_class=HTMLResponse)
+@db_session
+def location_detail(request: Request, location_id: UUID):
+    """Detailseite für einen Arbeitsort."""
+    from database.models import LocationOfWork as DBLocationOfWork
+    from database.models import Appointment as DBAppointment
+    from datetime import date
+    
+    # Arbeitsort aus der Datenbank laden
+    location = DBLocationOfWork.get(id=location_id)
+    if not location:
+        raise HTTPException(status_code=404, detail="Arbeitsort nicht gefunden")
+
+    print(schemas.LocationOfWorkDetail.model_validate(location))
+    
+    # Location-Daten manuell erstellen
+    location_detail = {
+        "id": location.id,
+        "name": location.name,
+        "address": {
+            "id": location.address.id,
+            "street": location.address.street,
+            "postal_code": location.address.postal_code,
+            "city": location.address.city
+        }
+    }
+    
+    # Zukünftige Termine für diesen Ort laden
+    today = date.today()
+    future_appointments = DBAppointment.select(
+        lambda a: a.location.id == location_id and a.date >= today
+    ).order_by(lambda a: (a.date, a.start_time))
+
+    pprint.pprint([schemas.AppointmentDetail.model_validate(a) for a in future_appointments])
+    
+    # # Termine in ein Format konvertieren, das im Template verwendbar ist
+    # appointments_data = []
+    # for appointment in future_appointments:
+    #     # Personen des Termins umwandeln
+    #     persons_data = []
+    #     for person in appointment.persons:
+    #         persons_data.append({
+    #             "id": person.id,
+    #             "f_name": person.f_name,
+    #             "l_name": person.l_name,
+    #             "email": person.email,
+    #             "full_name": f"{person.f_name} {person.l_name}"
+    #         })
+    #
+    #     # Location mit Adresse umwandeln
+    #     location_data = {
+    #         "id": appointment.location.id,
+    #         "name": appointment.location.name,
+    #         "address": {
+    #             "id": appointment.location.address.id,
+    #             "street": appointment.location.address.street,
+    #             "postal_code": appointment.location.address.postal_code,
+    #             "city": appointment.location.address.city
+    #         }
+    #     }
+    #
+    #     # Termin-Daten erstellen
+    #     appointment_data = {
+    #         "id": appointment.id,
+    #         "plan_period": {
+    #             "id": appointment.plan_period.id,
+    #             "name": appointment.plan_period.name,
+    #             "start_date": appointment.plan_period.start_date,
+    #             "end_date": appointment.plan_period.end_date
+    #         },
+    #         "date": appointment.date,
+    #         "start_time": appointment.start_time,
+    #         "delta": appointment.delta,
+    #         "location": location_data,
+    #         "persons": persons_data,
+    #         "guests": appointment.guests,
+    #         "notes": appointment.notes,
+    #         # Zusätzliche Informationen für das Template
+    #         "start_time_str": appointment.start_time.strftime("%H:%M"),
+    #         "end_time_str": appointment.get_end_time().strftime("%H:%M")
+    #     }
+    #     appointments_data.append(appointment_data)
+
+    location_detail = schemas.LocationOfWorkDetail.model_validate(location)
+    appointments_data = [schemas.AppointmentDetail.model_validate(a) for a in future_appointments]
+    
+    # Template rendern
+    return templates.TemplateResponse(
+        "location_detail.html",
+        {
+            "request": request,
+            "location": location_detail,
+            "appointments": appointments_data
+        }
     )

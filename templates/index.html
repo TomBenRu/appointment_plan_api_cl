@@ -94,17 +94,4 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    function loadMonth(year, month) {
-        // Funktion zum Laden eines Monats
-        document.querySelector('input[name="year"]').value = year;
-        document.querySelector('input[name="month"]').value = month;
-    }
-    
-    // Beim Laden der Seite den aktuellen Monat setzen
-    document.addEventListener('DOMContentLoaded', function() {
-        const now = new Date();
-        loadMonth(now.getFullYear(), now.getMonth() + 1);
-    });
-</script>
 {% endblock %}

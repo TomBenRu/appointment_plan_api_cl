@@ -40,7 +40,7 @@
                             <div class="text-primary-200">{{ appointment.location.name }}</div>
                             <div class="text-gray-300 mt-1">
                                 {% for person in appointment.persons %}
-                                    {{ person.full_name }}{% if not loop.last %}, {% endif %}
+                                    <a href="/persons/{{ person.id }}" class="hover:text-white hover:underline">{{ person.full_name }}</a>{% if not loop.last %}, {% endif %}
                                 {% endfor %}
                                 {% if appointment.guests %}
                                     {% if appointment.persons %}, {% endif %}

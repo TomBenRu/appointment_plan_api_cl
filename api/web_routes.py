@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Request, Depends, Query, HTTPException
 from fastapi.responses import HTMLResponse
-from pony.orm import db_session
+from pony.orm import db_session, desc
 
 from api.models import schemas
 from database.models import Appointment as DBAppointment
@@ -251,5 +251,72 @@ def location_detail(request: Request, location_id: UUID):
             "request": request,
             "location": location_detail,
             "appointments": appointments_data
+        }
+    )
+
+
+@router.get("/persons", response_class=HTMLResponse)
+@db_session
+def persons(request: Request):
+    """Seite mit allen Personen."""
+    from database.models import Person as DBPerson
+    
+    # Alle Personen aus der Datenbank laden
+    all_persons = DBPerson.select().order_by(lambda p: (p.l_name, p.f_name))
+
+    persons_data = [schemas.Person.model_validate(p) for p in all_persons]
+    
+    # Template rendern
+    return templates.TemplateResponse(
+        "persons.html",
+        {
+            "request": request,
+            "persons": persons_data
+        }
+    )
+
+
+@router.get("/persons/{person_id}", response_class=HTMLResponse)
+@db_session
+def person_detail(request: Request, person_id: UUID):
+    """Detailseite für eine Person."""
+    from database.models import Person as DBPerson
+    from database.models import Appointment as DBAppointment
+    from datetime import date
+    
+    # Person aus der Datenbank laden
+    person = DBPerson.get(id=person_id)
+    if not person:
+        raise HTTPException(status_code=404, detail="Person nicht gefunden")
+    
+    # Aktuelles Datum
+    today = date.today()
+    
+    # Zukünftige Termine für diese Person laden
+    future_appointments = DBAppointment.select(
+        lambda a: person in a.persons and a.date >= today
+    ).order_by(lambda a: (a.date, a.start_time))
+    
+    # Vergangene Termine für diese Person laden (letzte 30 Tage)
+    past_date = today - timedelta(days=30)
+    past_appointments = (DBAppointment.select()
+                         .filter(lambda a: person in a.persons)
+                         .filter(lambda a: a.date < today)
+                         .filter(lambda a: a.date >= past_date).order_by(lambda a: (desc(a.date), a.start_time)))
+    for appointment in past_appointments:
+        print(appointment.date)
+
+    person_detail = schemas.Person.model_validate(person)
+    future_appointments_data = [schemas.AppointmentDetail.model_validate(a) for a in future_appointments]
+    past_appointments_data = [schemas.AppointmentDetail.model_validate(a) for a in past_appointments]
+    
+    # Template rendern
+    return templates.TemplateResponse(
+        "person_detail.html",
+        {
+            "request": request,
+            "person": person_detail,
+            "future_appointments": future_appointments_data,
+            "past_appointments": past_appointments_data
         }
     )

@@ -3,79 +3,85 @@
 {% block title %}Kalender - Terminplanung{% endblock %}
 
 {% block content %}
-<div class="bg-white rounded-lg shadow-md p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Kalender</h1>
+<div class="bg-gray-900 rounded-lg shadow-xl p-8 text-gray-100">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-blue-400">Kalender</h1>
         
-        <div class="flex space-x-2">
+        <div class="flex space-x-4">
             <!-- Versteckte Felder mit IDs -->
             <input type="hidden" id="current-year" name="year" value="{{ year }}">
             <input type="hidden" id="current-month" name="month" value="{{ month }}">
             
             <button 
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                class="px-4 py-2 bg-blue-600 text-gray-100 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2"
                 hx-get="/api/calendar-partial"
                 hx-target="#calendar-container"
                 hx-include="[name='year'],[name='month']"
                 hx-vals='{"direction": "prev"}'
             >
-                Vorheriger Monat
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <span>Vorheriger</span>
             </button>
             
-            <span id="month-display" class="px-4 py-2 font-semibold">
+            <span id="month-display" class="px-6 py-2 font-semibold text-xl bg-gray-800 rounded-lg border border-gray-700">
                 {{ month_name }} {{ year }}
             </span>
             
             <button 
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                class="px-4 py-2 bg-blue-600 text-gray-100 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2"
                 hx-get="/api/calendar-partial"
                 hx-target="#calendar-container"
                 hx-include="[name='year'],[name='month']"
                 hx-vals='{"direction": "next"}'
             >
-                Nächster Monat
+                <span>Nächster</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
             </button>
         </div>
     </div>
     
     <div id="calendar-container" class="mt-6">
-        <!-- Hier wird der Kalender geladen -->
         <div class="grid grid-cols-7 gap-4">
             <!-- Wochentage -->
-            <div class="text-center font-semibold">Mo</div>
-            <div class="text-center font-semibold">Di</div>
-            <div class="text-center font-semibold">Mi</div>
-            <div class="text-center font-semibold">Do</div>
-            <div class="text-center font-semibold">Fr</div>
-            <div class="text-center font-semibold">Sa</div>
-            <div class="text-center font-semibold">So</div>
+            <div class="text-center font-semibold text-blue-400 py-2">Mo</div>
+            <div class="text-center font-semibold text-blue-400 py-2">Di</div>
+            <div class="text-center font-semibold text-blue-400 py-2">Mi</div>
+            <div class="text-center font-semibold text-blue-400 py-2">Do</div>
+            <div class="text-center font-semibold text-blue-400 py-2">Fr</div>
+            <div class="text-center font-semibold text-blue-400 py-2">Sa</div>
+            <div class="text-center font-semibold text-blue-400 py-2">So</div>
             
-            <!-- Kalender-Tage (werden dynamisch gefüllt) -->
+            <!-- Kalender-Tage -->
             {% for week in calendar_weeks %}
                 {% for day in week %}
-                    <div class="border rounded p-2 min-h-[100px] {% if day.is_current_month %}bg-white{% else %}bg-gray-100 text-gray-500{% endif %}">
-                        <div class="flex justify-between">
-                            <span class="font-semibold">{{ day.day }}</span>
+                    <div class="border border-gray-700 rounded-lg p-3 min-h-[120px] transition-colors duration-200 
+                        {% if day.is_current_month %}bg-gray-800 hover:bg-gray-750{% else %}bg-gray-900 text-gray-500{% endif %}">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium">{{ day.day }}</span>
                             {% if day.is_today %}
-                                <span class="inline-block w-6 h-6 bg-blue-600 text-white rounded-full text-center">
+                                <span class="inline-flex items-center justify-center w-7 h-7 bg-blue-600 text-white rounded-full">
                                     {{ day.day }}
                                 </span>
                             {% endif %}
                         </div>
                         
-                        <!-- Termine für diesen Tag -->
-                        <div class="mt-2 space-y-1">
-                             {% for appointment in day.appointments %}
-                                <div class="p-1 text-xs bg-blue-100 text-blue-800 rounded">
-                                    <div>{{ appointment.start_time_str }} - {{ appointment.end_time_str }}</div>
-                                    <div>{{ appointment.location.name }}</div>
-                                    <div class="text-gray-600">
+                        <!-- Termine -->
+                        <div class="mt-2 space-y-2">
+                            {% for appointment in day.appointments %}
+                                <div class="p-2 text-xs bg-blue-900 text-blue-200 rounded-md hover:bg-blue-800 transition-colors duration-200">
+                                    <div class="font-medium">{{ appointment.start_time_str }} - {{ appointment.end_time_str }}</div>
+                                    <div class="text-blue-300">{{ appointment.location.name }}</div>
+                                    <div class="text-gray-400 mt-1">
                                         {% for person in appointment.persons %}
                                             {{ person.full_name }}{% if not loop.last %}, {% endif %}
                                         {% endfor %}
                                         {% if appointment.guests %}
                                             {% if appointment.persons %}, {% endif %}
-                                            <span class="italic">
+                                            <span class="italic text-gray-500">
                                                 {% for guest in appointment.guests %}
                                                     {{ guest }}{% if not loop.last %}, {% endif %}
                                                 {% endfor %}

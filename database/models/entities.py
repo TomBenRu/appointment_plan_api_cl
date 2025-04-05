@@ -23,7 +23,8 @@ class LocationOfWork(db.Entity):
 
 class Person(db.Entity):
     id = PrimaryKey(UUID, auto=True)
-    name = Required(str)
+    f_name = Required(str)
+    l_name = Required(str)
     email = PonyOptional(str)
     appointments = Set('Appointment')
 

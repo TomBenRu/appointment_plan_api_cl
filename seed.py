@@ -79,27 +79,33 @@ def seed_database():
     print("Erstelle Personen...")
     persons = [
         Person(
-            name="Max Mustermann",
+            f_name="Max",
+            l_name="Mustermann",
             email="max.mustermann@example.com"
         ),
         Person(
-            name="Erika Musterfrau",
+            f_name="Erika",
+            l_name="Musterfrau",
             email="erika.musterfrau@example.com"
         ),
         Person(
-            name="John Doe",
+            f_name="John",
+            l_name="Doe",
             email="john.doe@example.com"
         ),
         Person(
-            name="Jane Smith",
+            f_name="Jane",
+            l_name="Smith",
             email="jane.smith@example.com"
         ),
         Person(
-            name="Hans Schmidt",
+            f_name="Hans",
+            l_name="Schmidt",
             email="hans.schmidt@example.com"
         ),
         Person(
-            name="Maria Müller",
+            f_name="Maria",
+            l_name="Müller",
             email="maria.mueller@example.com"
         )
     ]

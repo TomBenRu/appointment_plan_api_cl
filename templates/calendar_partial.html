@@ -39,7 +39,7 @@
                             <div>{{ appointment.location.name }}</div>
                             <div class="text-gray-600">
                                 {% for person in appointment.persons %}
-                                    {{ person.name }}{% if not loop.last %}, {% endif %}
+                                    {{ person.full_name }}{% if not loop.last %}, {% endif %}
                                 {% endfor %}
                                 {% if appointment.guests %}
                                     {% if appointment.persons %}, {% endif %}

@@ -29,8 +29,13 @@ class LocationOfWorkDetail(BaseSchema):
 
 
 class Person(BaseSchema):
-    name: str
+    f_name: str
+    l_name: str
     email: Optional[str] = None
+
+    @property
+    def full_name(self) -> str:
+        return f'{self.f_name} {self.l_name}'
 
 
 class PlanPeriod(BaseSchema):

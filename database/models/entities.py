@@ -33,7 +33,7 @@ class PlanPeriod(db.Entity):
     name = Required(str)
     start_date = Required(date)
     end_date = Required(date)
-    plans = Set('Plan')
+    plan = PonyOptional('Plan')
     appointments = Set('Appointment')
 
 class Appointment(db.Entity):

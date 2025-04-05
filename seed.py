@@ -161,11 +161,6 @@ def seed_database():
             plan_period=plan_periods[0]
         ),
         Plan(
-            name="Internes Meeting",
-            notes="Regelmäßige Team-Besprechung",
-            plan_period=plan_periods[0]
-        ),
-        Plan(
             name="Kundenprojekt Beta",
             notes="Neues Projekt, Kickoff-Phase",
             plan_period=plan_periods[1]
@@ -224,10 +219,7 @@ def seed_database():
             appointment.persons.add(participant)
         
         # Dem entsprechenden Plan hinzufügen
-        if i % 3 == 0:  # Jeder dritte Termin gehört zu Plan 1
-            plans[0].appointments.add(appointment)
-        elif i % 3 == 1:  # Jeder dritte + 1 Termin gehört zu Plan 2
-            plans[1].appointments.add(appointment)
+        plans[0].appointments.add(appointment)
     
     # Zukünftige Termine erstellen (für die nächste Planungsperiode)
     for i in range(10):  # 10 Termine für den nächsten Monat
@@ -271,7 +263,7 @@ def seed_database():
             appointment.persons.add(participant)
         
         # Dem entsprechenden Plan hinzufügen
-        plans[2].appointments.add(appointment)
+        plans[1].appointments.add(appointment)
     
     commit()
     print("Testdaten erfolgreich eingefügt!")

@@ -189,8 +189,7 @@ def plan_detail(request: Request, plan_id: UUID):
         raise HTTPException(status_code=404, detail="Plan nicht gefunden")
 
     plan_detail = schemas.PlanDetail.model_validate(plan)
-    for appointment in plan_detail.appointments:
-        print(appointment.date_str)
+    plan_detail.appointments.sort(key=lambda a: (a.date, a.start_time))
 
     # Template rendern
     return templates.TemplateResponse(
@@ -235,76 +234,12 @@ def location_detail(request: Request, location_id: UUID):
     location = DBLocationOfWork.get(id=location_id)
     if not location:
         raise HTTPException(status_code=404, detail="Arbeitsort nicht gefunden")
-
-    print(schemas.LocationOfWorkDetail.model_validate(location))
-    
-    # Location-Daten manuell erstellen
-    location_detail = {
-        "id": location.id,
-        "name": location.name,
-        "address": {
-            "id": location.address.id,
-            "street": location.address.street,
-            "postal_code": location.address.postal_code,
-            "city": location.address.city
-        }
-    }
     
     # Zukünftige Termine für diesen Ort laden
     today = date.today()
     future_appointments = DBAppointment.select(
         lambda a: a.location.id == location_id and a.date >= today
     ).order_by(lambda a: (a.date, a.start_time))
-
-    pprint.pprint([schemas.AppointmentDetail.model_validate(a) for a in future_appointments])
-    
-    # # Termine in ein Format konvertieren, das im Template verwendbar ist
-    # appointments_data = []
-    # for appointment in future_appointments:
-    #     # Personen des Termins umwandeln
-    #     persons_data = []
-    #     for person in appointment.persons:
-    #         persons_data.append({
-    #             "id": person.id,
-    #             "f_name": person.f_name,
-    #             "l_name": person.l_name,
-    #             "email": person.email,
-    #             "full_name": f"{person.f_name} {person.l_name}"
-    #         })
-    #
-    #     # Location mit Adresse umwandeln
-    #     location_data = {
-    #         "id": appointment.location.id,
-    #         "name": appointment.location.name,
-    #         "address": {
-    #             "id": appointment.location.address.id,
-    #             "street": appointment.location.address.street,
-    #             "postal_code": appointment.location.address.postal_code,
-    #             "city": appointment.location.address.city
-    #         }
-    #     }
-    #
-    #     # Termin-Daten erstellen
-    #     appointment_data = {
-    #         "id": appointment.id,
-    #         "plan_period": {
-    #             "id": appointment.plan_period.id,
-    #             "name": appointment.plan_period.name,
-    #             "start_date": appointment.plan_period.start_date,
-    #             "end_date": appointment.plan_period.end_date
-    #         },
-    #         "date": appointment.date,
-    #         "start_time": appointment.start_time,
-    #         "delta": appointment.delta,
-    #         "location": location_data,
-    #         "persons": persons_data,
-    #         "guests": appointment.guests,
-    #         "notes": appointment.notes,
-    #         # Zusätzliche Informationen für das Template
-    #         "start_time_str": appointment.start_time.strftime("%H:%M"),
-    #         "end_time_str": appointment.get_end_time().strftime("%H:%M")
-    #     }
-    #     appointments_data.append(appointment_data)
 
     location_detail = schemas.LocationOfWorkDetail.model_validate(location)
     appointments_data = [schemas.AppointmentDetail.model_validate(a) for a in future_appointments]

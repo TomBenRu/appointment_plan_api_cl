@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}{{ person.full_name }} - Terminplanung{% endblock %}
+
+{% block content %}
+<div class="bg-dark-800 rounded-xl shadow-2xl p-8 text-gray-100 border border-dark-600">
+    <!-- Personen-Header -->
+    <div class="flex items-center mb-8">
+        <a href="/persons" class="bg-primary-800 hover:bg-primary-700 text-white p-2 rounded-lg mr-4 transition-all duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+        </a>
+        <div class="flex-1">
+            <h1 class="text-3xl font-bold text-primary-300 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mr-3 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {{ person.full_name }}
+            </h1>
+            {% if person.email %}
+                <div class="flex items-center mt-2 text-primary-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>{{ person.email }}</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Zukünftige Termine -->
+    <div class="mb-10">
+        <h2 class="text-2xl font-bold text-primary-300 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Zukünftige Termine
+        </h2>
+        
+        {% if future_appointments %}
+            <div class="space-y-4">
+                {% for appointment in future_appointments %}
+                    <div class="bg-dark-700 p-4 rounded-lg border border-dark-600 hover:border-primary-700 transition-all hover:shadow-md">
+                        <div class="flex flex-col md:flex-row justify-between gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center">
+                                    <div class="bg-primary-900 text-primary-200 rounded-md p-2 mr-3 flex flex-col items-center">
+                                        <span class="text-xs font-bold">{{ appointment.date.strftime('%d.%m') }}</span>
+                                        <span class="text-sm">{{ appointment.date.strftime('%Y') }}</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-white">{{ appointment.start_time_str }} - {{ appointment.end_time_str }}</p>
+                                        <p class="text-primary-200 font-medium">{{ appointment.location.name }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <div class="flex flex-wrap gap-2">
+                                        {% for p in appointment.persons %}
+                                            <span class="inline-flex items-center bg-primary-800 text-primary-100 text-xs px-2 py-1 rounded-full">
+                                                {% if p.id == person.id %}
+                                                    <span class="font-bold">{{ p.full_name }}</span>
+                                                {% else %}
+                                                    <a href="/persons/{{ p.id }}" class="hover:text-white">{{ p.full_name }}</a>
+                                                {% endif %}
+                                            </span>
+                                        {% endfor %}
+                                        
+                                        {% for guest in appointment.guests %}
+                                            <span class="inline-flex items-center bg-dark-600 text-gray-300 text-xs px-2 py-1 rounded-full">
+                                                {{ guest }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    {% if appointment.notes %}
+                                        <div class="mt-2 text-sm text-gray-400">
+                                            {{ appointment.notes }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col items-end space-y-2">
+                                <span class="text-xs text-gray-400">Planperiode:</span>
+                                <span class="text-sm text-primary-200">{{ appointment.plan_period.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-dark-700 p-6 rounded-lg border border-dark-600 text-center">
+                <p class="text-gray-400">Keine zukünftigen Termine vorhanden.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Vergangene Termine -->
+    <div>
+        <h2 class="text-2xl font-bold text-primary-300 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Vergangene Termine (letzte 30 Tage)
+        </h2>
+        
+        {% if past_appointments %}
+            <div class="space-y-4">
+                {% for appointment in past_appointments %}
+                    <div class="bg-dark-700 p-4 rounded-lg border border-dark-600 opacity-75 hover:opacity-100 transition-all">
+                        <div class="flex flex-col md:flex-row justify-between gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center">
+                                    <div class="bg-dark-600 text-gray-400 rounded-md p-2 mr-3 flex flex-col items-center">
+                                        <span class="text-xs font-bold">{{ appointment.date.strftime('%d.%m') }}</span>
+                                        <span class="text-sm">{{ appointment.date.strftime('%Y') }}</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-white">{{ appointment.start_time_str }} - {{ appointment.end_time_str }}</p>
+                                        <p class="text-primary-200 font-medium">{{ appointment.location.name }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <div class="flex flex-wrap gap-2">
+                                        {% for p in appointment.persons %}
+                                            <span class="inline-flex items-center bg-dark-600 text-gray-300 text-xs px-2 py-1 rounded-full">
+                                                {% if p.id == person.id %}
+                                                    <span class="font-bold">{{ p.full_name }}</span>
+                                                {% else %}
+                                                    <a href="/persons/{{ p.id }}" class="hover:text-white">{{ p.full_name }}</a>
+                                                {% endif %}
+                                            </span>
+                                        {% endfor %}
+                                        
+                                        {% for guest in appointment.guests %}
+                                            <span class="inline-flex items-center bg-dark-600 text-gray-300 text-xs px-2 py-1 rounded-full opacity-75">
+                                                {{ guest }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-dark-700 p-6 rounded-lg border border-dark-600 text-center">
+                <p class="text-gray-400">Keine vergangenen Termine in den letzten 30 Tagen.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

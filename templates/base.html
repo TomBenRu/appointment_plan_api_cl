@@ -22,7 +22,7 @@
     {% block head %}{% endblock %}
 </head>
 <body class="bg-dark-900 text-gray-100 min-h-screen">
-    <header class="bg-dark-800 border-b border-primary-700 shadow-lg">
+    <header class="bg-dark-800 border-b border-primary-700 shadow-lg fixed top-0 left-0 right-0 z-50">
         <div class="container mx-auto px-4 py-4">
             <nav class="flex items-center justify-between">
                 <a href="/" class="text-2xl font-bold text-primary-300">Terminplanung</a>
@@ -36,7 +36,7 @@
         </div>
     </header>
     
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-4 py-8 mt-24">
         {% block content %}{% endblock %}
     </main>
     

@@ -544,7 +544,7 @@ def search(
                               )
                               )
 
-        results["appointments"] = [schemas.AppointmentDetail.model_validate(a) for a in appointments]
+        results["appointments"] = [schemas.AppointmentDetail.model_validate(a) for a in appointments.order_by(lambda a: a.date)[:20]]
     
     # Wenn kein Typ angegeben wurde oder explizit nach Personen gesucht wird
     if type is None or type == "person":

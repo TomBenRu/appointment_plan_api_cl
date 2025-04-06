@@ -31,6 +31,37 @@
             </button>
             
             <div class="flex space-x-2 items-center">
+                <div class="relative inline-block" id="month-select-container" style="min-width: 120px;">
+                    <select 
+                        id="month-select" 
+                        name="selected_month" 
+                        class="bg-dark-700 text-primary-200 border border-primary-800 rounded-md py-1 pl-2 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary-500 w-full"
+                        hx-get="/api/calendar-partial"
+                        hx-target="#calendar-container"
+                        hx-trigger="change"
+                        hx-include="this"
+                        hx-vals='{"direction": "month"}'
+                    >
+                        <option value="1" {% if month == 1 %}selected{% endif %}>Januar</option>
+                        <option value="2" {% if month == 2 %}selected{% endif %}>Februar</option>
+                        <option value="3" {% if month == 3 %}selected{% endif %}>März</option>
+                        <option value="4" {% if month == 4 %}selected{% endif %}>April</option>
+                        <option value="5" {% if month == 5 %}selected{% endif %}>Mai</option>
+                        <option value="6" {% if month == 6 %}selected{% endif %}>Juni</option>
+                        <option value="7" {% if month == 7 %}selected{% endif %}>Juli</option>
+                        <option value="8" {% if month == 8 %}selected{% endif %}>August</option>
+                        <option value="9" {% if month == 9 %}selected{% endif %}>September</option>
+                        <option value="10" {% if month == 10 %}selected{% endif %}>Oktober</option>
+                        <option value="11" {% if month == 11 %}selected{% endif %}>November</option>
+                        <option value="12" {% if month == 12 %}selected{% endif %}>Dezember</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-primary-300">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                </div>
+                
                 <div class="relative inline-block" id="year-select-container">
                     <select 
                         id="year-select" 

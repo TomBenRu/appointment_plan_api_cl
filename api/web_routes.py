@@ -104,10 +104,11 @@ def index(request: Request):
 @db_session
 def calendar_partial(
     request: Request,
-    direction: str = Query(None, description="Richtung (prev/next/today/year)"),
+    direction: str = Query(None, description="Richtung (prev/next/today/year/month)"),
     year: int = Query(None, description="Jahr"),
     month: int = Query(None, description="Monat (1-12)"),
-    selected_year: int = Query(None, description="Ausgewähltes Jahr aus Dropdown")
+    selected_year: int = Query(None, description="Ausgewähltes Jahr aus Dropdown"),
+    selected_month: int = Query(None, description="Ausgewählter Monat aus Dropdown")
 ):
     """Liefert das Kalender-Partial für einen bestimmten Monat."""
     # Wenn kein Jahr/Monat übergeben wurde, nehmen wir den aktuellen
@@ -121,6 +122,10 @@ def calendar_partial(
         today = date.today()
         year = today.year
         month = today.month
+    elif direction == "month":
+        # Monat wird direkt über den "selected_month"-Parameter gesetzt
+        if selected_month is not None:
+            month = selected_month
     elif direction == "year":
         # Jahr wird direkt über den "selected_year"-Parameter gesetzt
         # Month bleibt unverändert

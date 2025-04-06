@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Request, Depends, Query, HTTPException
 from fastapi.responses import HTMLResponse
-from pony.orm import db_session, desc, get
+from pony.orm import db_session, desc, get, select
 
 from api.models import schemas
 from database.models import Appointment as DBAppointment
@@ -58,7 +58,7 @@ def get_month_name(month: int) -> str:
 
 @router.get("/", response_class=HTMLResponse)
 @db_session
-def index(request: Request, filter_person_id: UUID = Query(None), filter_location_id: UUID = Query(None)):
+def index(request: Request, filter_person_id: Optional[str] = Query(None), filter_location_id: Optional[str] = Query(None)):
     """Homepage mit Kalenderansicht."""
     # Aktuelles Datum
     today = date.today()
@@ -77,15 +77,23 @@ def index(request: Request, filter_person_id: UUID = Query(None), filter_locatio
     
     # Filterung nach Person
     if filter_person_id:
-        appointments_query = appointments_query.filter(
-            lambda a: any(p.id == filter_person_id for p in a.persons)
-        )
+        try:
+            person_uuid = UUID(filter_person_id) if isinstance(filter_person_id, str) else filter_person_id
+            appointments_query = appointments_query.filter(
+                lambda a: any(p.id == person_uuid for p in a.persons)
+            )
+        except (ValueError, TypeError):
+            pass  # Ungültige UUID ignorieren
     
     # Filterung nach Arbeitsort
     if filter_location_id:
-        appointments_query = appointments_query.filter(
-            lambda a: a.location.id == filter_location_id
-        )
+        try:
+            location_uuid = UUID(filter_location_id) if isinstance(filter_location_id, str) else filter_location_id
+            appointments_query = appointments_query.filter(
+                lambda a: a.location.id == location_uuid
+            )
+        except (ValueError, TypeError):
+            pass  # Ungültige UUID ignorieren
     
     # Abfrage ausführen
     appointments = list(appointments_query)
@@ -98,14 +106,22 @@ def index(request: Request, filter_person_id: UUID = Query(None), filter_locatio
     
     # Namen der gefilterten Entitäten abrufen für die Anzeige
     if filter_person_id:
-        person = DBPerson.get(id=filter_person_id)
-        if person:
-            active_filters["person"] = {"id": str(person.id), "name": f"{person.f_name} {person.l_name}"}
+        try:
+            person_uuid = UUID(filter_person_id) if isinstance(filter_person_id, str) else filter_person_id
+            person = DBPerson.get(id=person_uuid)
+            if person:
+                active_filters["person"] = {"id": str(person.id), "name": f"{person.f_name} {person.l_name}"}
+        except (ValueError, TypeError):
+            pass  # Ungültige UUID ignorieren
     
     if filter_location_id:
-        location = DBLocationOfWork.get(id=filter_location_id)
-        if location:
-            active_filters["location"] = {"id": str(location.id), "name": location.name}
+        try:
+            location_uuid = UUID(filter_location_id) if isinstance(filter_location_id, str) else filter_location_id
+            location = DBLocationOfWork.get(id=location_uuid)
+            if location:
+                active_filters["location"] = {"id": str(location.id), "name": location.name}
+        except (ValueError, TypeError):
+            pass  # Ungültige UUID ignorieren
     
     # Termine in den Kalender einfügen
     for appointment in appointments:
@@ -153,8 +169,8 @@ def calendar_partial(
     month: int = Query(None, description="Monat (1-12)"),
     selected_year: int = Query(None, description="Ausgewähltes Jahr aus Dropdown"),
     selected_month: int = Query(None, description="Ausgewählter Monat aus Dropdown"),
-    filter_person_id: Optional[UUID] = Query(default=None, description="Person-ID für Filterung"),
-    filter_location_id: Optional[UUID] = Query(default=None, description="Arbeitsort-ID für Filterung")
+    filter_person_id: Optional[str] = Query(None, description="Person-ID für Filterung"),
+    filter_location_id: Optional[str] = Query(None, description="Arbeitsort-ID für Filterung")
 ):
     """Liefert das Kalender-Partial für einen bestimmten Monat."""
     # Wenn kein Jahr/Monat übergeben wurde, nehmen wir den aktuellen
@@ -204,16 +220,23 @@ def calendar_partial(
     
     # Filterung nach Person
     if filter_person_id:
-        print(f'{filter_person_id=}')
-        appointments_query = appointments_query.filter(
-            lambda a: a.persons.filter(lambda p: p.id == filter_person_id)
-        )
+        try:
+            person_uuid = UUID(filter_person_id) if isinstance(filter_person_id, str) else filter_person_id
+            person = DBPerson.get(id=person_uuid)
+            appointments_query = select(a for a in appointments_query if person in a.persons)
+        except (ValueError, TypeError):
+            pass  # Ungültige UUID ignorieren
+
     
     # Filterung nach Arbeitsort
     if filter_location_id:
-        appointments_query = appointments_query.filter(
-            lambda a: a.location.id == filter_location_id
-        )
+        try:
+            location_uuid = UUID(filter_location_id) if isinstance(filter_location_id, str) else filter_location_id
+            appointments_query = appointments_query.filter(
+                lambda a: a.location.id == location_uuid
+            )
+        except (ValueError, TypeError):
+            pass  # Ungültige UUID ignorieren
     
     # Abfrage ausführen
     appointments = list(appointments_query)
@@ -226,15 +249,22 @@ def calendar_partial(
     
     # Namen der gefilterten Entitäten abrufen für die Anzeige
     if filter_person_id:
-        person = DBPerson.get(id=filter_person_id)
-        if person:
-            active_filters["person"] = {"id": str(person.id), "name": f"{person.f_name} {person.l_name}"}
+        try:
+            person_uuid = UUID(filter_person_id) if isinstance(filter_person_id, str) else filter_person_id
+            person = DBPerson.get(id=person_uuid)
+            if person:
+                active_filters["person"] = {"id": str(person.id), "name": f"{person.f_name} {person.l_name}"}
+        except (ValueError, TypeError):
+            pass  # Ungültige UUID ignorieren
     
     if filter_location_id:
-        from database.models import LocationOfWork as DBLocationOfWork
-        location = DBLocationOfWork.get(id=filter_location_id)
-        if location:
-            active_filters["location"] = {"id": str(location.id), "name": location.name}
+        try:
+            location_uuid = UUID(filter_location_id) if isinstance(filter_location_id, str) else filter_location_id
+            location = DBLocationOfWork.get(id=location_uuid)
+            if location:
+                active_filters["location"] = {"id": str(location.id), "name": location.name}
+        except (ValueError, TypeError):
+            pass  # Ungültige UUID ignorieren
     
     for appointment in appointments:
         appointment_data = schemas.AppointmentDetail.model_validate(appointment)
@@ -248,7 +278,7 @@ def calendar_partial(
         for day in week:
             day["appointments"].sort(key=lambda a: (a.start_time, a.delta))
 
-        # Alle Personen und Arbeitsorte für Filter-Dropdowns laden
+    # Alle Personen und Arbeitsorte für Filter-Dropdowns laden
     all_persons = [schemas.Person.model_validate(p) for p in
                    DBPerson.select().order_by(lambda p: (p.l_name, p.f_name))]
     all_locations = [schemas.LocationOfWorkDetail.model_validate(l) for l in

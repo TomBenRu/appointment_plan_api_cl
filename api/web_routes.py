@@ -552,7 +552,7 @@ def search(
         persons = DBPerson.select(
             lambda p: search_term_lower in p.f_name.lower() or
                       search_term_lower in p.l_name.lower() or
-                      (p.email is not None and search_term_lower in p.email.lower())
+                      (p.email and search_term_lower in p.email.lower())
         ).order_by(lambda p: (p.l_name, p.f_name))[:20]  # Limit auf 20 Ergebnisse
         
         results["persons"] = [schemas.Person.model_validate(p) for p in persons]

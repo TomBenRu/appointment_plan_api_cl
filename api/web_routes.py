@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Request, Depends, Query, HTTPException
 from fastapi.responses import HTMLResponse
-from pony.orm import db_session, desc, get, select
+from pony.orm import db_session, desc, get, select, exists
 
 from api.models import schemas
 from database.models import Appointment as DBAppointment
@@ -496,5 +496,87 @@ def person_detail(request: Request, person_id: UUID):
             "person": person_detail,
             "future_appointments": future_appointments_data,
             "past_appointments": past_appointments_data
+        }
+    )
+
+
+@router.get("/api/search", response_class=HTMLResponse)
+@db_session
+def search(
+    request: Request,
+    q: str = Query(..., description="Suchbegriff"),
+    type: Optional[str] = Query(None, description="Entitätstyp (appointment, person, location)")
+):
+    """
+    Durchsucht Termine, Personen und Orte nach dem angegebenen Suchbegriff.
+    Optional kann die Suche auf einen bestimmten Entitätstyp beschränkt werden.
+    """
+    results = {
+        "appointments": [],
+        "persons": [],
+        "locations": []
+    }
+    
+    search_term_lower = q.lower()
+    
+    # Wenn kein Typ angegeben wurde oder explizit nach Terminen gesucht wird
+    if type is None or type == "appointment":
+
+        appointments = select(a for a in DBAppointment if
+                              # 1. Suche in Notizen (case-insensitive, None-sicher)
+                              (a.notes and search_term_lower in a.notes.lower()) or
+
+                              # 2. Suche in verknüpften Personen (case-insensitive, None-sicher für Namen)
+                              # Prüfe, ob *mindestens eine* Person existiert, deren Vor- ODER Nachname passt
+                              exists(p for p in a.persons if
+                                     (p.f_name and search_term_lower in p.f_name.lower()) or
+                                     (p.l_name and search_term_lower in p.l_name.lower())
+                                     ) or
+
+                              # 3. Suche im Namen des Ortes (case-insensitive, None-sicher für Ort und Name)
+                              (
+                                      a.location and a.location.name and search_term_lower in a.location.name.lower()) or
+
+                              # 4. Suche in Gästen (siehe Diskussion unten)
+                              # ... hier kommt die Logik für `guests` hin ...
+                              (
+                                      search_term_lower in str(a.guests).lower()
+                              )
+                              )
+
+        results["appointments"] = [schemas.AppointmentDetail.model_validate(a) for a in appointments]
+    
+    # Wenn kein Typ angegeben wurde oder explizit nach Personen gesucht wird
+    if type is None or type == "person":
+        # Suche nach Personen
+        persons = DBPerson.select(
+            lambda p: search_term_lower in p.f_name.lower() or
+                      search_term_lower in p.l_name.lower() or
+                      (p.email is not None and search_term_lower in p.email.lower())
+        ).order_by(lambda p: (p.l_name, p.f_name))[:20]  # Limit auf 20 Ergebnisse
+        
+        results["persons"] = [schemas.Person.model_validate(p) for p in persons]
+    
+    # Wenn kein Typ angegeben wurde oder explizit nach Orten gesucht wird
+    if type is None or type == "location":
+        # Suche nach Arbeitsorten
+        locations = DBLocationOfWork.select(
+            lambda l: search_term_lower in l.name.lower() or
+                      search_term_lower in l.address.street.lower() or
+                      search_term_lower in l.address.city.lower() or
+                      search_term_lower in l.address.postal_code.lower()
+        ).order_by(lambda l: l.name)[:20]  # Limit auf 20 Ergebnisse
+        
+        results["locations"] = [schemas.LocationOfWorkDetail.model_validate(l) for l in locations]
+    
+    # Template rendern
+    return templates.TemplateResponse(
+        "search_results.html",
+        {
+            "request": request,
+            "query": q,
+            "type": type,
+            "results": results,
+            "total_count": len(results["appointments"]) + len(results["persons"]) + len(results["locations"])
         }
     )

@@ -1,32 +1,27 @@
-/**
- * Funktion zur konsistenten Generierung von Farben basierend auf dem Namen eines Arbeitsortes
- */
+// Hilfsfunktion zum Generieren von Farben für Arbeitsorte
 function getLocationColor(locationName) {
-    // Predefinierten Farben im Stil des Designs (verschiedene Farbtöne, die gut zum Design passen)
-    const colors = [
-        '#7B1CD7', // primary-600
-        '#11A3D4', // accent-500
-        '#6C18BB', // primary-700
-        '#0F8FB8', // accent-600
-        '#9F4CF5', // primary-400
-        '#3EB3DB', // accent-400
-        '#8A20F2', // primary-500
-        '#0D7A9D', // accent-700
-        '#B378F7', // primary-300
-        '#0B6581'  // accent-800
-    ];
-    
-    // Einfache Hash-Funktion für den Location-Namen
+    // Einfache Hash-Funktion, um eine deterministische Farbe für jeden Ort zu erzeugen
     let hash = 0;
     for (let i = 0; i < locationName.length; i++) {
         hash = locationName.charCodeAt(i) + ((hash << 5) - hash);
     }
     
-    // Sicherstellen, dass der Hash positiv ist
-    hash = Math.abs(hash);
+    // Wir verwenden ein begrenztes Set von Farben, die gut zusammenpassen
+    const colors = [
+        '#8A20F2', // primary-500
+        '#6C18BB', // primary-700
+        '#5D14A0', // primary-800
+        '#11A3D4', // accent-500
+        '#0D7A9D', // accent-700
+        '#095166', // accent-900
+        '#F67280', // Ein Rosa-Ton
+        '#70C1B3', // Ein Türkis-Ton
+        '#FFE066', // Ein Gelb-Ton
+        '#247BA0', // Ein Blau-Ton
+        '#FF1654', // Ein Rot-Ton
+    ];
     
-    // Index in das Farb-Array umwandeln
-    const colorIndex = hash % colors.length;
-    
+    // Index zwischen 0 und colors.length - 1 auswählen
+    const colorIndex = Math.abs(hash) % colors.length;
     return colors[colorIndex];
 }

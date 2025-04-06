@@ -79,9 +79,8 @@ def index(request: Request, filter_person_id: Optional[str] = Query(None), filte
     if filter_person_id:
         try:
             person_uuid = UUID(filter_person_id) if isinstance(filter_person_id, str) else filter_person_id
-            appointments_query = appointments_query.filter(
-                lambda a: any(p.id == person_uuid for p in a.persons)
-            )
+            person = DBPerson.get(id=person_uuid)
+            appointments_query = select(a for a in appointments_query if person in a.persons)
         except (ValueError, TypeError):
             pass  # Ungültige UUID ignorieren
     
@@ -89,9 +88,8 @@ def index(request: Request, filter_person_id: Optional[str] = Query(None), filte
     if filter_location_id:
         try:
             location_uuid = UUID(filter_location_id) if isinstance(filter_location_id, str) else filter_location_id
-            appointments_query = appointments_query.filter(
-                lambda a: a.location.id == location_uuid
-            )
+            location = DBLocationOfWork.get(id=location_uuid)
+            appointments_query = select(a for a in appointments_query if a.location.id == location_uuid)
         except (ValueError, TypeError):
             pass  # Ungültige UUID ignorieren
     

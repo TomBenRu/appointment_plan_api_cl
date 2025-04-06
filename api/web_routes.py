@@ -10,6 +10,8 @@ from pony.orm import db_session, desc, get
 
 from api.models import schemas
 from database.models import Appointment as DBAppointment
+from database.models import Person as DBPerson
+from database.models import LocationOfWork as DBLocationOfWork
 from api import templates
 
 router = APIRouter()
@@ -56,7 +58,7 @@ def get_month_name(month: int) -> str:
 
 @router.get("/", response_class=HTMLResponse)
 @db_session
-def index(request: Request):
+def index(request: Request, filter_person_id: UUID = Query(None), filter_location_id: UUID = Query(None)):
     """Homepage mit Kalenderansicht."""
     # Aktuelles Datum
     today = date.today()
@@ -68,10 +70,42 @@ def index(request: Request):
     start_date = calendar_weeks[0][0]["date"]  # Erster Tag im Kalender
     end_date = calendar_weeks[-1][-1]["date"]  # Letzter Tag im Kalender
     
-    # Termine aus der Datenbank laden
-    appointments = list(DBAppointment.select(
+    # Basisabfrage
+    appointments_query = DBAppointment.select(
         lambda a: a.date >= start_date and a.date <= end_date
-    ))
+    )
+    
+    # Filterung nach Person
+    if filter_person_id:
+        appointments_query = appointments_query.filter(
+            lambda a: any(p.id == filter_person_id for p in a.persons)
+        )
+    
+    # Filterung nach Arbeitsort
+    if filter_location_id:
+        appointments_query = appointments_query.filter(
+            lambda a: a.location.id == filter_location_id
+        )
+    
+    # Abfrage ausführen
+    appointments = list(appointments_query)
+    
+    # Aktive Filter für die Anzeige speichern
+    active_filters = {
+        "person": None,
+        "location": None
+    }
+    
+    # Namen der gefilterten Entitäten abrufen für die Anzeige
+    if filter_person_id:
+        person = DBPerson.get(id=filter_person_id)
+        if person:
+            active_filters["person"] = {"id": str(person.id), "name": f"{person.f_name} {person.l_name}"}
+    
+    if filter_location_id:
+        location = DBLocationOfWork.get(id=filter_location_id)
+        if location:
+            active_filters["location"] = {"id": str(location.id), "name": location.name}
     
     # Termine in den Kalender einfügen
     for appointment in appointments:
@@ -82,10 +116,15 @@ def index(request: Request):
             for day in week:
                 if day["date"] == appointment.date:
                     day["appointments"].append(appointment_data)
+    
     for week in calendar_weeks:
         for day in week:
             day["appointments"].sort(key=lambda a: (a.start_time, a.delta))
     
+    # Alle Personen und Arbeitsorte für Filter-Dropdowns laden
+    all_persons = [schemas.Person.model_validate(p) for p in DBPerson.select().order_by(lambda p: (p.l_name, p.f_name))]
+    all_locations = [schemas.LocationOfWorkDetail.model_validate(l) for l in DBLocationOfWork.select().order_by(lambda l: l.name)]
+
     # Template rendern
     return templates.TemplateResponse(
         "index.html",
@@ -95,7 +134,12 @@ def index(request: Request):
             "year": today.year,
             "month": today.month,
             "month_name": get_month_name(today.month),
-            "today": today
+            "today": today,
+            "active_filters": active_filters,
+            "filter_person_id": filter_person_id,
+            "filter_location_id": filter_location_id,
+            "all_persons": all_persons,
+            "all_locations": all_locations
         }
     )
 
@@ -108,7 +152,9 @@ def calendar_partial(
     year: int = Query(None, description="Jahr"),
     month: int = Query(None, description="Monat (1-12)"),
     selected_year: int = Query(None, description="Ausgewähltes Jahr aus Dropdown"),
-    selected_month: int = Query(None, description="Ausgewählter Monat aus Dropdown")
+    selected_month: int = Query(None, description="Ausgewählter Monat aus Dropdown"),
+    filter_person_id: Optional[UUID] = Query(default=None, description="Person-ID für Filterung"),
+    filter_location_id: Optional[UUID] = Query(default=None, description="Arbeitsort-ID für Filterung")
 ):
     """Liefert das Kalender-Partial für einen bestimmten Monat."""
     # Wenn kein Jahr/Monat übergeben wurde, nehmen wir den aktuellen
@@ -147,12 +193,48 @@ def calendar_partial(
     # Kalenderdaten erstellen
     calendar_weeks = get_calendar_data(year, month)
     
-    # Termine laden und einfügen (wie bisher)
+    # Termine laden und filtern
     start_date = calendar_weeks[0][0]["date"]
     end_date = calendar_weeks[-1][-1]["date"]
-    appointments = list(DBAppointment.select(
+    
+    # Basisabfrage
+    appointments_query = DBAppointment.select(
         lambda a: a.date >= start_date and a.date <= end_date
-    ))
+    )
+    
+    # Filterung nach Person
+    if filter_person_id:
+        print(f'{filter_person_id=}')
+        appointments_query = appointments_query.filter(
+            lambda a: a.persons.filter(lambda p: p.id == filter_person_id)
+        )
+    
+    # Filterung nach Arbeitsort
+    if filter_location_id:
+        appointments_query = appointments_query.filter(
+            lambda a: a.location.id == filter_location_id
+        )
+    
+    # Abfrage ausführen
+    appointments = list(appointments_query)
+    
+    # Aktive Filter für die Anzeige speichern
+    active_filters = {
+        "person": None,
+        "location": None
+    }
+    
+    # Namen der gefilterten Entitäten abrufen für die Anzeige
+    if filter_person_id:
+        person = DBPerson.get(id=filter_person_id)
+        if person:
+            active_filters["person"] = {"id": str(person.id), "name": f"{person.f_name} {person.l_name}"}
+    
+    if filter_location_id:
+        from database.models import LocationOfWork as DBLocationOfWork
+        location = DBLocationOfWork.get(id=filter_location_id)
+        if location:
+            active_filters["location"] = {"id": str(location.id), "name": location.name}
     
     for appointment in appointments:
         appointment_data = schemas.AppointmentDetail.model_validate(appointment)
@@ -165,6 +247,12 @@ def calendar_partial(
     for week in calendar_weeks:
         for day in week:
             day["appointments"].sort(key=lambda a: (a.start_time, a.delta))
+
+        # Alle Personen und Arbeitsorte für Filter-Dropdowns laden
+    all_persons = [schemas.Person.model_validate(p) for p in
+                   DBPerson.select().order_by(lambda p: (p.l_name, p.f_name))]
+    all_locations = [schemas.LocationOfWorkDetail.model_validate(l) for l in
+                     DBLocationOfWork.select().order_by(lambda l: l.name)]
     
     # Template rendern
     return templates.TemplateResponse(
@@ -174,8 +262,14 @@ def calendar_partial(
             "calendar_weeks": calendar_weeks,
             "year": year,
             "month": month,
-            "month_name": get_month_name(month),  # Monatsnamen hinzufügen
-            "today": date.today()
+            "month_name": get_month_name(month),
+            "today": date.today(),
+            "active_filters": active_filters,
+            "filter_person_id": filter_person_id,
+            "filter_location_id": filter_location_id,
+            # Alle Personen und Arbeitsorte für Filter-Dropdowns laden
+            "all_persons": all_persons,
+            "all_locations": all_locations
         }
     )
 
@@ -251,9 +345,6 @@ def locations(request: Request):
 @db_session
 def location_detail(request: Request, location_id: UUID):
     """Detailseite für einen Arbeitsort."""
-    from database.models import LocationOfWork as DBLocationOfWork
-    from database.models import Appointment as DBAppointment
-    from datetime import date, timedelta
     
     # Arbeitsort aus der Datenbank laden
     location = DBLocationOfWork.get(id=location_id)
@@ -294,7 +385,6 @@ def location_detail(request: Request, location_id: UUID):
 @db_session
 def persons(request: Request):
     """Seite mit allen Personen."""
-    from database.models import Person as DBPerson
     
     # Alle Personen aus der Datenbank laden
     all_persons = DBPerson.select().order_by(lambda p: (p.l_name, p.f_name))
@@ -315,7 +405,6 @@ def persons(request: Request):
 @db_session
 def appointment_detail_modal(request: Request, appointment_id: UUID):
     """Liefert das Modal-Fragment für Termindetails."""
-    from database.models import Appointment as DBAppointment
     
     # Termin aus der Datenbank laden
     appointment = DBAppointment.get(id=appointment_id)
@@ -343,8 +432,6 @@ def close_modal(request: Request):
 @db_session
 def person_detail(request: Request, person_id: UUID):
     """Detailseite für eine Person."""
-    from database.models import Person as DBPerson
-    from database.models import Appointment as DBAppointment
     from datetime import date
     
     # Person aus der Datenbank laden

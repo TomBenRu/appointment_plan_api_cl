@@ -57,6 +57,97 @@
     </div>
 </div>
 
+<!-- OOB-Swap für den Filter-Bereich -->
+<div class="bg-dark-700 p-4 rounded-lg border border-dark-600 mb-6" hx-swap-oob="true" id="filter-section">
+    <div class="flex flex-wrap gap-4 items-center">
+        <div class="text-sm font-semibold text-primary-300">Filter:</div>
+        
+        <!-- Person-Filter -->
+        <div class="relative inline-block" style="min-width: 200px;">
+            <select 
+                id="filter-person" 
+                name="filter_person_id" 
+                class="bg-dark-700 text-primary-200 border border-primary-800 rounded-md py-1 pl-2 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary-500 w-full"
+                hx-get="/api/calendar-partial"
+                hx-target="#calendar-container"
+                hx-trigger="change"
+                hx-include="this,[name='filter_location_id'],[name='year'],[name='month']"
+            >
+                <option value="">-- Person auswählen --</option>
+                {% for person in all_persons %}
+                    <option value="{{ person.id }}" {% if filter_person_id == person.id %}selected{% endif %}>{{ person.f_name }} {{ person.l_name }}</option>
+                {% endfor %}
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-primary-300">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Ort-Filter -->
+        <div class="relative inline-block" style="min-width: 200px;">
+            <select
+                id="filter-location"
+                name="filter_location_id"
+                class="bg-dark-700 text-primary-200 border border-primary-800 rounded-md py-1 pl-2 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary-500 w-full"
+                hx-get="/api/calendar-partial"
+                hx-target="#calendar-container"
+                hx-trigger="change"
+                hx-include="this,[name='filter_person_id'],[name='year'],[name='month']"
+            >
+                <option value="">-- Ort auswählen --</option>
+                {% for location in all_locations %}
+                    <option value="{{ location.id }}" {% if filter_location_id == location.id %}selected{% endif %}>{{ location.name }}</option>
+                {% endfor %}
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-primary-300">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Aktive Filter anzeigen -->
+        <div class="flex-1">
+            {% if active_filters.person or active_filters.location %}
+                <div class="flex flex-wrap gap-2">
+                    {% if active_filters.person %}
+                        <div class="bg-primary-800 text-primary-100 rounded-full px-3 py-1 text-sm flex items-center">
+                            <span class="mr-1 font-semibold">Person:</span> {{ active_filters.person.name }}
+                            <a href="/?{% if filter_location_id %}filter_location_id={{ filter_location_id }}{% endif %}" class="ml-2 text-primary-200 hover:text-white">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </a>
+                        </div>
+                    {% endif %}
+                    
+                    {% if active_filters.location %}
+                        <div class="bg-primary-800 text-primary-100 rounded-full px-3 py-1 text-sm flex items-center">
+                            <span class="mr-1 font-semibold">Ort:</span> {{ active_filters.location.name }}
+                            <a href="/?{% if filter_person_id %}filter_person_id={{ filter_person_id }}{% endif %}" class="ml-2 text-primary-200 hover:text-white">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <span class="text-gray-400 text-sm">Keine Filter aktiv</span>
+            {% endif %}
+        </div>
+        
+        <!-- Filter zurücksetzen -->
+        {% if active_filters.person or active_filters.location %}
+            <a href="/" class="bg-dark-600 hover:bg-dark-500 text-gray-200 px-3 py-1 rounded-md text-sm transition-colors duration-200">
+                Alle Filter zurücksetzen
+            </a>
+        {% endif %}
+    </div>
+</div>
+
 <!-- OOB-Swap für den Heute-Button -->
 <button hx-swap-oob="true"
     id="today-button"

@@ -18,7 +18,7 @@
         <!-- Termin-Inhalt -->
         <div class="space-y-4">
             <!-- Datum und Uhrzeit -->
-            <div class="flex items-center bg-dark-700 p-3 rounded-lg" style="border-left-width: 6px; border-left-color: var(--color);" x-init="$el.style.setProperty('--color', getLocationColor('{{ appointment.location.name }}'))">
+            <div class="flex items-center bg-dark-700 p-3 rounded-lg" style="border-left-width: 4px; border-left-color: var(--color);" x-init="$el.style.setProperty('--color', getLocationColor('{{ appointment.location.name }}'))">
                 <div class="bg-primary-900 text-primary-100 rounded-md p-2 mr-3 flex flex-col items-center">
                     <span class="text-xs font-bold">{{ appointment.date.strftime('%d.%m') }}</span>
                     <span class="text-sm">{{ appointment.date.strftime('%Y') }}</span>

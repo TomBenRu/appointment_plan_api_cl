@@ -232,7 +232,7 @@
                         {% if appointment.location.name not in locations %}
                             {% set _ = locations.append(appointment.location.name) %}
                             <div class="inline-flex items-center px-3 py-1 text-xs rounded-md bg-dark-600 text-gray-200"
-                                 style="border-left-width: 6px; border-left-color: var(--color);" 
+                                 style="border-left-width: 4px; border-left-color: var(--color);" 
                                  x-init="$el.style.setProperty('--color', getLocationColor('{{ appointment.location.name }}'))">
                                 {{ appointment.location.name }}
                             </div>
@@ -245,14 +245,16 @@
     
     <div id="calendar-container" class="mt-6">
         <div class="grid grid-cols-7 gap-4">
-            <!-- Wochentage -->
-            <div class="text-center font-semibold text-primary-300 py-2">Mo</div>
-            <div class="text-center font-semibold text-primary-300 py-2">Di</div>
-            <div class="text-center font-semibold text-primary-300 py-2">Mi</div>
-            <div class="text-center font-semibold text-primary-300 py-2">Do</div>
-            <div class="text-center font-semibold text-primary-300 py-2">Fr</div>
-            <div class="text-center font-semibold text-primary-300 py-2">Sa</div>
-            <div class="text-center font-semibold text-primary-300 py-2">So</div>
+            <!-- Wochentage als sticky header -->
+            <div class="sticky sm:top-30 md:top-32 lg:top-20 xl:top-17 z-10 col-span-7 grid grid-cols-7 bg-dark-800 pt-2 pb-4 mb-1 border-b border-dark-600 shadow-md">
+                <div class="text-center font-semibold text-primary-300">Mo</div>
+                <div class="text-center font-semibold text-primary-300">Di</div>
+                <div class="text-center font-semibold text-primary-300">Mi</div>
+                <div class="text-center font-semibold text-primary-300">Do</div>
+                <div class="text-center font-semibold text-primary-300">Fr</div>
+                <div class="text-center font-semibold text-primary-300">Sa</div>
+                <div class="text-center font-semibold text-primary-300">So</div>
+            </div>
             
             <!-- Kalender-Tage -->
             {% for week in calendar_weeks %}
@@ -289,8 +291,8 @@
                                         <div class="text-xs font-bold text-primary-300 mb-2">Alle Termine:</div>
                                         <div class="max-h-40 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-primary-700 scrollbar-track-dark-700">
                                             {% for appointment in day.appointments %}
-                                            <div class="p-2 text-xs bg-primary-900 bg-opacity-50 rounded text-white"
-                                                 style="border-left-width: 6px; border-left-color: var(--color);" 
+                                             <div class="p-2 text-xs bg-primary-900 bg-opacity-50 rounded text-white"
+                                                 style="border-left-width: 4px; border-left-color: var(--color);" 
                                                  x-init="$el.style.setProperty('--color', getLocationColor('{{ appointment.location.name }}'))">
                                                 <div class="font-semibold">{{ appointment.start_time_str }} - {{ appointment.end_time_str }}</div>
                                                 <div class="text-primary-200">{{ appointment.location.name }}</div>
@@ -311,7 +313,7 @@
                                      hx-swap="innerHTML"
                                      hx-trigger="click"
                                      @click.stop
-                                     style="border-left-width: 6px; border-left-color: var(--color);" 
+                                     style="border-left-width: 4px; border-left-color: var(--color);" 
                                      x-init="$el.style.setProperty('--color', getLocationColor('{{ appointment.location.name }}'))">
                                     <div class="font-medium text-white">{{ appointment.start_time_str }} - {{ appointment.end_time_str }}</div>
                                     <div class="text-primary-200">{{ appointment.location.name }}</div>

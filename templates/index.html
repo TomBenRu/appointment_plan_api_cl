@@ -13,9 +13,7 @@
         </h1>
         
         <div class="flex space-x-4">
-            <!-- Versteckte Felder mit IDs -->
-            <input type="hidden" id="current-year" name="year" value="{{ year }}">
-            <input type="hidden" id="current-month" name="month" value="{{ month }}">
+            <!-- Jahr- und Monatsnavigation -->
             
             <button 
                 class="px-4 py-2 bg-primary-700 text-gray-100 rounded-lg hover:bg-primary-600 hover:shadow-lg transition-all duration-200 flex items-center space-x-2"
@@ -34,13 +32,13 @@
                 <div class="relative inline-block" id="month-select-container" style="min-width: 120px;">
                     <select 
                         id="month-select" 
-                        name="selected_month" 
+                        name="month" 
                         class="bg-dark-700 text-primary-200 border border-primary-800 rounded-md py-1 pl-2 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary-500 w-full"
                         hx-get="/api/calendar-partial"
                         hx-target="#calendar-container"
                         hx-trigger="change"
-                        hx-include="this"
-                        hx-vals='{"direction": "month"}'
+                        hx-include="this,[name='year'],[name='filter_person_id'],[name='filter_location_id']"
+                    >
                     >
                         <option value="1" {% if month == 1 %}selected{% endif %}>Januar</option>
                         <option value="2" {% if month == 2 %}selected{% endif %}>Februar</option>
@@ -65,13 +63,13 @@
                 <div class="relative inline-block" id="year-select-container">
                     <select 
                         id="year-select" 
-                        name="selected_year" 
+                        name="year" 
                         class="bg-dark-700 text-primary-200 border border-primary-800 rounded-md py-1 pl-2 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary-500"
                         hx-get="/api/calendar-partial"
                         hx-target="#calendar-container"
                         hx-trigger="change"
-                        hx-include="this"
-                        hx-vals='{"direction": "year"}'
+                        hx-include="this,[name='month'],[name='filter_person_id'],[name='filter_location_id']"
+                    >
                     >
                         {% for y in range(year-5, year+6) %}
                             <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>

@@ -174,11 +174,9 @@ def index(request: Request,
 @db_session
 def calendar_partial(
     request: Request,
-    direction: str = Query(None, description="Richtung (prev/next/today/year/month)"),
+    direction: str = Query(None, description="Richtung (prev/next/today)"),
     year: int = Query(None, description="Jahr"),
     month: int = Query(None, description="Monat (1-12)"),
-    selected_year: int = Query(None, description="Ausgewähltes Jahr aus Dropdown"),
-    selected_month: int = Query(None, description="Ausgewählter Monat aus Dropdown"),
     filter_person_id: Optional[str] = Query(None, description="Person-ID für Filterung"),
     filter_location_id: Optional[str] = Query(None, description="Arbeitsort-ID für Filterung")
 ):
@@ -194,15 +192,6 @@ def calendar_partial(
         today = date.today()
         year = today.year
         month = today.month
-    elif direction == "month":
-        # Monat wird direkt über den "selected_month"-Parameter gesetzt
-        if selected_month is not None:
-            month = selected_month
-    elif direction == "year":
-        # Jahr wird direkt über den "selected_year"-Parameter gesetzt
-        # Month bleibt unverändert
-        if selected_year is not None:
-            year = selected_year
     elif direction == "prev":
         if month == 1:
             year -= 1
@@ -236,7 +225,6 @@ def calendar_partial(
             appointments_query = select(a for a in appointments_query if person in a.persons)
         except (ValueError, TypeError):
             pass  # Ungültige UUID ignorieren
-
     
     # Filterung nach Arbeitsort
     if filter_location_id:

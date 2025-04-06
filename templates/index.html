@@ -167,7 +167,7 @@
             </div>
             
             <!-- Aktive Filter anzeigen -->
-            <div class="flex-1">
+            <div class="flex-1" id="active-filters-display">
                 {% if active_filters.person or active_filters.location %}
                     <div class="flex flex-wrap gap-2">
                         {% if active_filters.person %}
@@ -198,11 +198,13 @@
             </div>
             
             <!-- Filter zurücksetzen -->
-            {% if active_filters.person or active_filters.location %}
-                <a href="/" class="bg-dark-600 hover:bg-dark-500 text-gray-200 px-3 py-1 rounded-md text-sm transition-colors duration-200">
-                    Alle Filter zurücksetzen
-                </a>
-            {% endif %}
+            <div id="reset-button-container">
+                {% if active_filters.person or active_filters.location %}
+                    <a href="/" class="bg-dark-600 hover:bg-dark-500 text-gray-200 px-3 py-1 rounded-md text-sm transition-colors duration-200">
+                        Alle Filter zurücksetzen
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </div>
     

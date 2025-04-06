@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Request, Depends, Query, HTTPException
 from fastapi.responses import HTMLResponse
-from pony.orm import db_session, desc
+from pony.orm import db_session, desc, get
 
 from api.models import schemas
 from database.models import Appointment as DBAppointment
@@ -285,6 +285,34 @@ def persons(request: Request):
         }
     )
 
+
+@router.get("/api/appointments/{appointment_id}/detail", response_class=HTMLResponse)
+@db_session
+def appointment_detail_modal(request: Request, appointment_id: UUID):
+    """Liefert das Modal-Fragment für Termindetails."""
+    from database.models import Appointment as DBAppointment
+    
+    # Termin aus der Datenbank laden
+    appointment = DBAppointment.get(id=appointment_id)
+    
+    if not appointment:
+        raise HTTPException(status_code=404, detail="Termin nicht gefunden")
+    
+    appointment_detail = schemas.AppointmentDetail.model_validate(appointment)
+    
+    # Template rendern
+    return templates.TemplateResponse(
+        "appointment_detail_modal.html",
+        {
+            "request": request,
+            "appointment": appointment_detail
+        }
+    )
+
+@router.get("/api/close-modal", response_class=HTMLResponse)
+def close_modal(request: Request):
+    """Schließt das Modal, indem ein leerer String zurückgegeben wird."""
+    return ""
 
 @router.get("/persons/{person_id}", response_class=HTMLResponse)
 @db_session

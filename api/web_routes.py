@@ -144,6 +144,11 @@ def calendar_partial(
             for day in week:
                 if day["date"] == appointment.date:
                     day["appointments"].append(appointment_data)
+
+    # Termine nach Startzeit sortieren
+    for week in calendar_weeks:
+        for day in week:
+            day["appointments"].sort(key=lambda a: (a.start_time, a.delta))
     
     # Template rendern
     return templates.TemplateResponse(

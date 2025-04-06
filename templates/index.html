@@ -173,7 +173,7 @@
                         {% if active_filters.person %}
                             <div class="bg-primary-800 text-primary-100 rounded-full px-3 py-1 text-sm flex items-center">
                                 <span class="mr-1 font-semibold">Person:</span> {{ active_filters.person.name }}
-                                <a href="/?{% if filter_location_id %}filter_location_id={{ filter_location_id }}{% endif %}" class="ml-2 text-primary-200 hover:text-white">
+                                <a href="/?year={{ year }}&month={{ month }}{% if filter_location_id %}&filter_location_id={{ filter_location_id }}{% endif %}" class="ml-2 text-primary-200 hover:text-white">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -184,7 +184,7 @@
                         {% if active_filters.location %}
                             <div class="bg-primary-800 text-primary-100 rounded-full px-3 py-1 text-sm flex items-center">
                                 <span class="mr-1 font-semibold">Ort:</span> {{ active_filters.location.name }}
-                                <a href="/?{% if filter_person_id %}filter_person_id={{ filter_person_id }}{% endif %}" class="ml-2 text-primary-200 hover:text-white">
+                                <a href="/?year={{ year }}&month={{ month }}{% if filter_person_id %}&filter_person_id={{ filter_person_id }}{% endif %}" class="ml-2 text-primary-200 hover:text-white">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -200,7 +200,7 @@
             <!-- Filter zurücksetzen -->
             <div id="reset-button-container">
                 {% if active_filters.person or active_filters.location %}
-                    <a href="/" class="bg-dark-600 hover:bg-dark-500 text-gray-200 px-3 py-1 rounded-md text-sm transition-colors duration-200">
+                    <a href="/?year={{ year }}&month={{ month }}" class="bg-dark-600 hover:bg-dark-500 text-gray-200 px-3 py-1 rounded-md text-sm transition-colors duration-200">
                         Alle Filter zurücksetzen
                     </a>
                 {% endif %}

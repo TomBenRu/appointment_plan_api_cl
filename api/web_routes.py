@@ -58,13 +58,25 @@ def get_month_name(month: int) -> str:
 
 @router.get("/", response_class=HTMLResponse)
 @db_session
-def index(request: Request, filter_person_id: Optional[str] = Query(None), filter_location_id: Optional[str] = Query(None)):
+def index(request: Request, 
+          year: Optional[int] = Query(None),
+          month: Optional[int] = Query(None),
+          filter_person_id: Optional[str] = Query(None), 
+          filter_location_id: Optional[str] = Query(None)):
     """Homepage mit Kalenderansicht."""
     # Aktuelles Datum
     today = date.today()
     
-    # Kalenderdaten für den aktuellen Monat erstellen
-    calendar_weeks = get_calendar_data(today.year, today.month)
+    # Jahr und Monat aus URL-Parametern übernehmen, wenn vorhanden
+    display_year = year or today.year
+    display_month = month or today.month
+    
+    # Sicherstellen, dass Month zwischen 1 und 12 liegt
+    if display_month < 1 or display_month > 12:
+        display_month = today.month
+    
+    # Kalenderdaten für den angegebenen Monat erstellen
+    calendar_weeks = get_calendar_data(display_year, display_month)
     
     # Termine für den aktuellen Monat laden
     start_date = calendar_weeks[0][0]["date"]  # Erster Tag im Kalender
@@ -145,9 +157,9 @@ def index(request: Request, filter_person_id: Optional[str] = Query(None), filte
         {
             "request": request,
             "calendar_weeks": calendar_weeks,
-            "year": today.year,
-            "month": today.month,
-            "month_name": get_month_name(today.month),
+            "year": display_year,
+            "month": display_month,
+            "month_name": get_month_name(display_month),
             "today": today,
             "active_filters": active_filters,
             "filter_person_id": filter_person_id,

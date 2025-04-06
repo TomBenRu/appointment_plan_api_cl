@@ -6,19 +6,30 @@ function getLocationColor(locationName) {
         hash = locationName.charCodeAt(i) + ((hash << 5) - hash);
     }
     
-    // Wir verwenden ein begrenztes Set von Farben, die gut zusammenpassen
+    // Stark kontrastierende Farben für bessere Unterscheidbarkeit
+    // Diese Farben wurden speziell ausgewählt, um sich deutlich voneinander abzuheben
+    // und trotzdem zum dunklen Design zu passen
     const colors = [
-        '#8A20F2', // primary-500
-        '#6C18BB', // primary-700
-        '#5D14A0', // primary-800
-        '#11A3D4', // accent-500
-        '#0D7A9D', // accent-700
-        '#095166', // accent-900
-        '#F67280', // Ein Rosa-Ton
-        '#70C1B3', // Ein Türkis-Ton
-        '#FFE066', // Ein Gelb-Ton
-        '#247BA0', // Ein Blau-Ton
-        '#FF1654', // Ein Rot-Ton
+        '#FF3D00', // Leuchtendes Orange-Rot
+        '#2979FF', // Kräftiges Blau
+        '#00C853', // Sattes Grün
+        '#AA00FF', // Leuchtendes Violett
+        '#FFAB00', // Goldgelb
+        '#00BFA5', // Türkis
+        '#F50057', // Magenta
+        '#3D5AFE', // Indigo
+        '#76FF03', // Neon-Grün
+        '#FF3D7F', // Pink
+        '#00E5FF', // Cyan
+        '#C6FF00', // Limette
+        '#FF6D00', // Dunkel-Orange
+        '#2196F3', // Material Blau
+        '#FFC400', // Amber
+        '#E040FB', // Purpur
+        '#64DD17', // Helles Grün
+        '#FF4081', // Rosa
+        '#00B8D4', // Helles Cyan
+        '#FFEA00', // Gelb
     ];
     
     // Index zwischen 0 und colors.length - 1 auswählen

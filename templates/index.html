@@ -232,7 +232,8 @@
                         {% if appointment.location.name not in locations %}
                             {% set _ = locations.append(appointment.location.name) %}
                             <div class="inline-flex items-center px-3 py-1 text-xs rounded-md bg-dark-600 text-gray-200"
-                                 x-init="$el.style.borderLeftColor = getLocationColor('{{ appointment.location.name }}'); $el.style.borderLeftWidth = '4px'">
+                                 style="border-left-width: 6px; border-left-color: var(--color);" 
+                                 x-init="$el.style.setProperty('--color', getLocationColor('{{ appointment.location.name }}'))">
                                 {{ appointment.location.name }}
                             </div>
                         {% endif %}
@@ -257,8 +258,9 @@
             {% for week in calendar_weeks %}
                 {% for day in week %}
                     <div class="border {% if day.is_current_month %}border-dark-600{% else %}border-dark-700{% endif %} rounded-lg p-3 min-h-[160px] transition-all duration-200 
-                        {% if day.is_current_month %}bg-dark-700 hover:bg-dark-600 hover:shadow-md{% else %}bg-dark-800 text-gray-500{% endif %}" 
-                        x-data="{ appointmentCount: {{ day.appointments|length }}, showTooltip: false }">
+                        {% if day.is_current_month %}bg-dark-700 hover:bg-dark-600 hover:shadow-md cursor-pointer{% else %}bg-dark-800 text-gray-500{% endif %}" 
+                        x-data="{ appointmentCount: {{ day.appointments|length }}, showTooltip: false }"
+                        {% if day.is_current_month %}hx-get="/api/day-view/{{ day.date }}" hx-target="#modal-container" hx-swap="innerHTML" hx-trigger="click"{% endif %}>
                         <div class="flex justify-between items-center">
                             {% if not day.is_today %}<span class="font-medium">{{ day.day }}</span>{% endif %}
                             {% if day.is_today %}
@@ -288,7 +290,8 @@
                                         <div class="max-h-40 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-primary-700 scrollbar-track-dark-700">
                                             {% for appointment in day.appointments %}
                                             <div class="p-2 text-xs bg-primary-900 bg-opacity-50 rounded text-white"
-                                                 x-init="$el.style.borderLeftColor = getLocationColor('{{ appointment.location.name }}'); $el.style.borderLeftWidth = '4px'">
+                                                 style="border-left-width: 6px; border-left-color: var(--color);" 
+                                                 x-init="$el.style.setProperty('--color', getLocationColor('{{ appointment.location.name }}'))">
                                                 <div class="font-semibold">{{ appointment.start_time_str }} - {{ appointment.end_time_str }}</div>
                                                 <div class="text-primary-200">{{ appointment.location.name }}</div>
                                             </div>
@@ -307,7 +310,9 @@
                                      hx-target="#modal-container"
                                      hx-swap="innerHTML"
                                      hx-trigger="click"
-                                     x-init="$el.style.borderLeftColor = getLocationColor('{{ appointment.location.name }}'); $el.style.borderLeftWidth = '4px'">
+                                     @click.stop
+                                     style="border-left-width: 6px; border-left-color: var(--color);" 
+                                     x-init="$el.style.setProperty('--color', getLocationColor('{{ appointment.location.name }}'))">
                                     <div class="font-medium text-white">{{ appointment.start_time_str }} - {{ appointment.end_time_str }}</div>
                                     <div class="text-primary-200">{{ appointment.location.name }}</div>
                                     <div class="text-gray-300 mt-1">

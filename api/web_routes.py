@@ -456,6 +456,52 @@ def close_modal(request: Request):
     """Schließt das Modal, indem ein leerer String zurückgegeben wird."""
     return ""
 
+
+@router.get("/api/day-view/{date_str}", response_class=HTMLResponse)
+@db_session
+def day_view_modal(request: Request, date_str: str):
+    """Liefert das Modal-Fragment für die Tagesansicht."""
+    try:
+        selected_date = date.fromisoformat(date_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=400, 
+            detail="Ungültiges Datumsformat. Bitte verwenden Sie das Format YYYY-MM-DD."
+        )
+    
+    # Termine für den ausgewählten Tag laden
+    appointments = list(DBAppointment.select(lambda a: a.date == selected_date).order_by(lambda a: a.start_time))
+    appointments_data = [schemas.AppointmentDetail.model_validate(a) for a in appointments]
+    
+    # Formatierte Datumsangaben
+    day_name = selected_date.strftime("%A")
+    # Deutsche Wochentagsnamen
+    day_names = {
+        "Monday": "Montag",
+        "Tuesday": "Dienstag",
+        "Wednesday": "Mittwoch",
+        "Thursday": "Donnerstag",
+        "Friday": "Freitag",
+        "Saturday": "Samstag",
+        "Sunday": "Sonntag"
+    }
+    day_name = day_names.get(day_name, day_name)
+    
+    formatted_date = selected_date.strftime("%d.%m.%Y")
+    
+    # Template rendern
+    return templates.TemplateResponse(
+        "day_view_modal.html",
+        {
+            "request": request,
+            "date": selected_date,
+            "day_name": day_name,
+            "formatted_date": formatted_date,
+            "appointments": appointments_data,
+            "is_today": selected_date == date.today()
+        }
+    )
+
 @router.get("/persons/{person_id}", response_class=HTMLResponse)
 @db_session
 def person_detail(request: Request, person_id: UUID):

@@ -7,6 +7,21 @@
     {{ month_name }} {{ year }}
 </span>
 
+<!-- OOB-Swap für den Heute-Button -->
+<button hx-swap-oob="true"
+    id="today-button"
+    class="px-4 py-2 rounded-lg flex items-center space-x-2 {% if month == today.month and year == today.year %}bg-primary-800 text-gray-400 cursor-not-allowed{% else %}bg-primary-700 text-gray-100 hover:bg-primary-600 hover:shadow-lg transition-all duration-200{% endif %}"
+    hx-get="/api/calendar-partial"
+    hx-target="#calendar-container"
+    hx-vals='{"direction": "today"}'
+    {% if month == today.month and year == today.year %}disabled{% endif %}
+>
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+    <span>Heute</span>
+</button>
+
 <!-- Legende für Arbeitsorte -->
 <div id="locations-legend" class="mb-4 bg-dark-700 p-4 rounded-lg border border-dark-600" hx-swap-oob="true">
     <div class="text-sm font-semibold text-primary-300 mb-2">Arbeitsorte:</div>

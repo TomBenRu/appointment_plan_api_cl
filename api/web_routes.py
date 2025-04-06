@@ -94,7 +94,8 @@ def index(request: Request):
             "calendar_weeks": calendar_weeks,
             "year": today.year,
             "month": today.month,
-            "month_name": get_month_name(today.month)
+            "month_name": get_month_name(today.month),
+            "today": today
         }
     )
 
@@ -115,7 +116,11 @@ def calendar_partial(
         month = today.month
     
     # Monat basierend auf direction anpassen
-    if direction == "prev":
+    if direction == "today":
+        today = date.today()
+        year = today.year
+        month = today.month
+    elif direction == "prev":
         if month == 1:
             year -= 1
             month = 12
@@ -158,7 +163,8 @@ def calendar_partial(
             "calendar_weeks": calendar_weeks,
             "year": year,
             "month": month,
-            "month_name": get_month_name(month)  # Monatsnamen hinzufügen
+            "month_name": get_month_name(month),  # Monatsnamen hinzufügen
+            "today": date.today()
         }
     )
 

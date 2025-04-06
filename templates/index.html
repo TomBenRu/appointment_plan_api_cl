@@ -49,6 +49,27 @@
         </div>
     </div>
     
+    <!-- Legende für Arbeitsorte -->
+    <div id="locations-legend" class="mb-4 bg-dark-700 p-4 rounded-lg border border-dark-600">
+        <div class="text-sm font-semibold text-primary-300 mb-2">Arbeitsorte:</div>
+        <div class="flex flex-wrap gap-2">
+            {% set locations = [] %}
+            {% for week in calendar_weeks %}
+                {% for day in week %}
+                    {% for appointment in day.appointments %}
+                        {% if appointment.location.name not in locations %}
+                            {% set _ = locations.append(appointment.location.name) %}
+                            <div class="inline-flex items-center px-3 py-1 text-xs rounded-md bg-dark-600 text-gray-200"
+                                 x-init="$el.style.borderLeftColor = getLocationColor('{{ appointment.location.name }}'); $el.style.borderLeftWidth = '4px'">
+                                {{ appointment.location.name }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+    
     <div id="calendar-container" class="mt-6">
         <div class="grid grid-cols-7 gap-4">
             <!-- Wochentage -->
@@ -94,7 +115,8 @@
                                         <div class="text-xs font-bold text-primary-300 mb-2">Alle Termine:</div>
                                         <div class="max-h-40 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-primary-700 scrollbar-track-dark-700">
                                             {% for appointment in day.appointments %}
-                                            <div class="p-2 text-xs bg-primary-900 bg-opacity-50 rounded text-white">
+                                            <div class="p-2 text-xs bg-primary-900 bg-opacity-50 rounded text-white"
+                                                 x-init="$el.style.borderLeftColor = getLocationColor('{{ appointment.location.name }}'); $el.style.borderLeftWidth = '4px'">
                                                 <div class="font-semibold">{{ appointment.start_time_str }} - {{ appointment.end_time_str }}</div>
                                                 <div class="text-primary-200">{{ appointment.location.name }}</div>
                                             </div>
@@ -112,7 +134,8 @@
                                      hx-get="/api/appointments/{{ appointment.id }}/detail"
                                      hx-target="#modal-container"
                                      hx-swap="innerHTML"
-                                     hx-trigger="click">
+                                     hx-trigger="click"
+                                     x-init="$el.style.borderLeftColor = getLocationColor('{{ appointment.location.name }}'); $el.style.borderLeftWidth = '4px'">
                                     <div class="font-medium text-white">{{ appointment.start_time_str }} - {{ appointment.end_time_str }}</div>
                                     <div class="text-primary-200">{{ appointment.location.name }}</div>
                                     <div class="text-gray-300 mt-1">

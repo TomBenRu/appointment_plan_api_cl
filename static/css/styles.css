@@ -33,6 +33,21 @@
 
 /* Zusätzliche benutzerdefinierte Styles */
 
+/* Scrollbar-Styles für die Terminliste */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+}
+
+.scrollbar-thumb-primary-700::-webkit-scrollbar-thumb {
+    background-color: var(--primary-700);
+    border-radius: 2px;
+}
+
+.scrollbar-track-dark-600::-webkit-scrollbar-track {
+    background-color: var(--dark-600);
+    border-radius: 2px;
+}
+
 /* Kalender-Styles */
 .calendar-day {
     transition: all 0.2s ease-in-out;

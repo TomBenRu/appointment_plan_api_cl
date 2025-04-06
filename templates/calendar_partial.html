@@ -5,22 +5,32 @@
             {% if active_filters.person %}
                 <div class="bg-primary-800 text-primary-100 rounded-full px-3 py-1 text-sm flex items-center">
                     <span class="mr-1 font-semibold">Person:</span> {{ active_filters.person.name }}
-                    <a href="/?year={{ year }}&month={{ month }}{% if filter_person_id %}&filter_person_id={{ filter_person_id }}{% endif %}" class="ml-2 text-primary-200 hover:text-white">
+                    <button
+                        hx-get="/api/calendar-partial"
+                        hx-target="#calendar-container"
+                        hx-include="[name='year'],[name='month'],[name='filter_location_id']"
+                        hx-vals='{"filter_person_id": ""}'
+                        class="ml-2 text-primary-200 hover:text-white bg-transparent border-0 p-0 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </a>
+                    </button>
                 </div>
             {% endif %}
             
             {% if active_filters.location %}
                 <div class="bg-primary-800 text-primary-100 rounded-full px-3 py-1 text-sm flex items-center">
                     <span class="mr-1 font-semibold">Ort:</span> {{ active_filters.location.name }}
-                    <a href="/?year={{ year }}&month={{ month }}{% if filter_location_id %}&filter_location_id={{ filter_location_id }}{% endif %}" class="ml-2 text-primary-200 hover:text-white">
+                    <button
+                        hx-get="/api/calendar-partial"
+                        hx-target="#calendar-container"
+                        hx-include="[name='year'],[name='month'],[name='filter_person_id']"
+                        hx-vals='{"filter_location_id": ""}'
+                        class="ml-2 text-primary-200 hover:text-white bg-transparent border-0 p-0 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </a>
+                    </button>
                 </div>
             {% endif %}
         </div>
@@ -32,9 +42,14 @@
 <!-- OOB-Swap für den Reset-Button Container -->
 <div id="reset-button-container" hx-swap-oob="true">
     {% if active_filters.person or active_filters.location %}
-        <a href="/?year={{ year }}&month={{ month }}" class="bg-dark-600 hover:bg-dark-500 text-gray-200 px-3 py-1 rounded-md text-sm transition-colors duration-200">
+        <button
+            hx-get="/api/calendar-partial"
+            hx-target="#calendar-container"
+            hx-include="[name='year'],[name='month']"
+            hx-vals='{"filter_person_id": "", "filter_location_id": ""}'
+            class="bg-dark-600 hover:bg-dark-500 text-gray-200 px-3 py-1 rounded-md text-sm transition-colors duration-200">
             Alle Filter zurücksetzen
-        </a>
+        </button>
     {% endif %}
 </div>
 <select 

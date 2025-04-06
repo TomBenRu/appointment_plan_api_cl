@@ -2,6 +2,29 @@
 <input type="hidden" id="current-year" name="year" value="{{ year }}" hx-swap-oob="true">
 <input type="hidden" id="current-month" name="month" value="{{ month }}" hx-swap-oob="true">
 
+<!-- OOB-Swap für die Jahresauswahl -->
+<div class="relative inline-block" hx-swap-oob="true" id="year-select-container">
+    <select 
+        id="year-select" 
+        name="selected_year" 
+        class="bg-dark-700 text-primary-200 border border-primary-800 rounded-md py-1 pl-2 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary-500"
+        hx-get="/api/calendar-partial"
+        hx-target="#calendar-container"
+        hx-trigger="change"
+        hx-include="this"
+        hx-vals='{"direction": "year"}'
+    >
+        {% for y in range(year-5, year+6) %}
+            <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+    </select>
+    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-primary-300">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+    </div>
+</div>
+
 <!-- OOB-Swap für die Monatsanzeige -->
 <span id="month-display" class="px-6 py-2 font-semibold text-xl bg-dark-700 rounded-lg border border-primary-800 text-primary-200 shadow-inner" hx-swap-oob="true">
     {{ month_name }} {{ year }}

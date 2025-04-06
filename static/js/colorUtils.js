@@ -6,30 +6,33 @@ function getLocationColor(locationName) {
         hash = locationName.charCodeAt(i) + ((hash << 5) - hash);
     }
     
-    // Stark kontrastierende Farben für bessere Unterscheidbarkeit
-    // Diese Farben wurden speziell ausgewählt, um sich deutlich voneinander abzuheben
-    // und trotzdem zum dunklen Design zu passen
+    // Harmonische Farben, die zum dunklen Design passen
+    // Gedämpfte, aber klar unterscheidbare Farben in mittlerer Sättigung
     const colors = [
-        '#FF3D00', // Leuchtendes Orange-Rot
-        '#2979FF', // Kräftiges Blau
-        '#00C853', // Sattes Grün
-        '#AA00FF', // Leuchtendes Violett
-        '#FFAB00', // Goldgelb
-        '#00BFA5', // Türkis
-        '#F50057', // Magenta
-        '#3D5AFE', // Indigo
-        '#76FF03', // Neon-Grün
-        '#FF3D7F', // Pink
-        '#00E5FF', // Cyan
-        '#C6FF00', // Limette
-        '#FF6D00', // Dunkel-Orange
-        '#2196F3', // Material Blau
-        '#FFC400', // Amber
-        '#E040FB', // Purpur
-        '#64DD17', // Helles Grün
-        '#FF4081', // Rosa
-        '#00B8D4', // Helles Cyan
-        '#FFEA00', // Gelb
+        '#8A20F2', // primary-500 (Original-Lila)
+        '#6C18BB', // primary-700 (Dunkleres Lila)
+        '#11A3D4', // accent-500 (Original-Blau)
+        '#0D7A9D', // accent-700 (Dunkleres Blau)
+        '#9C27B0', // Magenta-Lila
+        '#5E35B1', // Indigo
+        '#3949AB', // Dunkleres Blau
+        '#1E88E5', // Mittleres Blau
+        '#039BE5', // Helleres Blau
+        '#00ACC1', // Türkis
+        '#00897B', // Grün-Türkis
+        '#43A047', // Gedämpftes Grün
+        '#7CB342', // Olivgrün
+        '#C0CA33', // Blassgelb
+        '#FDD835', // Gedämpftes Gelb
+        '#FFB300', // Goldgelb
+        '#FB8C00', // Gedämpftes Orange
+        '#F4511E', // Terrakotta
+        '#E53935', // Gedämpftes Rot
+        '#D81B60', // Gedämpftes Pink
+        '#8E24AA', // Lila-Pink
+        '#5C6BC0', // Graublau
+        '#26A69A', // Meeresblau
+        '#66BB6A', // Pastellgrün
     ];
     
     // Index zwischen 0 und colors.length - 1 auswählen

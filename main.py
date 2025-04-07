@@ -3,7 +3,7 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
 from api import app
-from api.web_routes import router as web_router
+from api.routes import web_router
 from database import setup_database
 
 # Web-Routen einbinden

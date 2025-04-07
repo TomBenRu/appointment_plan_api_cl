@@ -9,51 +9,13 @@ from fastapi.responses import HTMLResponse
 from pony.orm import db_session, desc, get, select, exists
 
 from api.models import schemas
+from api.services import CalendarService
 from database.models import Appointment as DBAppointment
 from database.models import Person as DBPerson
 from database.models import LocationOfWork as DBLocationOfWork
 from api import templates
 
 router = APIRouter()
-
-def get_calendar_data(year: int, month: int) -> List[List[Dict[str, Any]]]:
-    """Erstellt die Kalenderdaten für den angegebenen Monat."""
-    # Kalenderobjekt erstellen (Woche beginnt mit Montag)
-    cal = calendar.Calendar(firstweekday=0)
-    
-    # Heutiges Datum
-    today = date.today()
-    
-    # Alle Tage des Monats inkl. angrenzender Tage bekommen
-    month_days = cal.monthdatescalendar(year, month)
-    
-    # Ergebnisliste vorbereiten
-    calendar_weeks = []
-    
-    # Alle Tage des Monats mit Terminen befüllen
-    for week in month_days:
-        week_data = []
-        for day in week:
-            day_data = {
-                "date": day,
-                "day": day.day,
-                "is_current_month": day.month == month,
-                "is_today": day == today,
-                "appointments": []  # Wird später befüllt
-            }
-            week_data.append(day_data)
-        calendar_weeks.append(week_data)
-    
-    return calendar_weeks
-
-def get_month_name(month: int) -> str:
-    """Gibt den deutschen Monatsnamen zurück."""
-    return {
-        1: "Januar", 2: "Februar", 3: "März", 
-        4: "April", 5: "Mai", 6: "Juni",
-        7: "Juli", 8: "August", 9: "September", 
-        10: "Oktober", 11: "November", 12: "Dezember"
-    }[month]
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -64,6 +26,9 @@ def index(request: Request,
           filter_person_id: Optional[str] = Query(None), 
           filter_location_id: Optional[str] = Query(None)):
     """Homepage mit Kalenderansicht."""
+    # Initialisiere den CalendarService
+    calendar_service = CalendarService()
+    
     # Aktuelles Datum
     today = date.today()
     
@@ -76,81 +41,24 @@ def index(request: Request,
         display_month = today.month
     
     # Kalenderdaten für den angegebenen Monat erstellen
-    calendar_weeks = get_calendar_data(display_year, display_month)
+    calendar_weeks = calendar_service.get_calendar_data(display_year, display_month)
     
-    # Termine für den aktuellen Monat laden
-    start_date = calendar_weeks[0][0]["date"]  # Erster Tag im Kalender
-    end_date = calendar_weeks[-1][-1]["date"]  # Letzter Tag im Kalender
-    
-    # Basisabfrage
-    appointments_query = DBAppointment.select(
-        lambda a: a.date >= start_date and a.date <= end_date
+    # Termine in den Kalender einfügen mit optionalen Filtern
+    calendar_weeks = calendar_service.fill_calendar_with_appointments(
+        calendar_weeks, 
+        filter_person_id=filter_person_id, 
+        filter_location_id=filter_location_id
     )
     
-    # Filterung nach Person
-    if filter_person_id:
-        try:
-            person_uuid = UUID(filter_person_id) if isinstance(filter_person_id, str) else filter_person_id
-            person = DBPerson.get(id=person_uuid)
-            appointments_query = select(a for a in appointments_query if person in a.persons)
-        except (ValueError, TypeError):
-            pass  # Ungültige UUID ignorieren
+    # Aktive Filter für die Anzeige ermitteln
+    active_filters = calendar_service.get_active_filters(
+        filter_person_id=filter_person_id,
+        filter_location_id=filter_location_id
+    )
     
-    # Filterung nach Arbeitsort
-    if filter_location_id:
-        try:
-            location_uuid = UUID(filter_location_id) if isinstance(filter_location_id, str) else filter_location_id
-            location = DBLocationOfWork.get(id=location_uuid)
-            appointments_query = select(a for a in appointments_query if a.location.id == location_uuid)
-        except (ValueError, TypeError):
-            pass  # Ungültige UUID ignorieren
+    # Filter-Optionen laden
+    filter_options = calendar_service.get_filter_options()
     
-    # Abfrage ausführen
-    appointments = list(appointments_query)
-    
-    # Aktive Filter für die Anzeige speichern
-    active_filters = {
-        "person": None,
-        "location": None
-    }
-    
-    # Namen der gefilterten Entitäten abrufen für die Anzeige
-    if filter_person_id:
-        try:
-            person_uuid = UUID(filter_person_id) if isinstance(filter_person_id, str) else filter_person_id
-            person = DBPerson.get(id=person_uuid)
-            if person:
-                active_filters["person"] = {"id": str(person.id), "name": f"{person.f_name} {person.l_name}"}
-        except (ValueError, TypeError):
-            pass  # Ungültige UUID ignorieren
-    
-    if filter_location_id:
-        try:
-            location_uuid = UUID(filter_location_id) if isinstance(filter_location_id, str) else filter_location_id
-            location = DBLocationOfWork.get(id=location_uuid)
-            if location:
-                active_filters["location"] = {"id": str(location.id), "name": location.name}
-        except (ValueError, TypeError):
-            pass  # Ungültige UUID ignorieren
-    
-    # Termine in den Kalender einfügen
-    for appointment in appointments:
-        appointment_data = schemas.AppointmentDetail.model_validate(appointment)
-        
-        # Termin dem entsprechenden Tag zuordnen
-        for week in calendar_weeks:
-            for day in week:
-                if day["date"] == appointment.date:
-                    day["appointments"].append(appointment_data)
-    
-    for week in calendar_weeks:
-        for day in week:
-            day["appointments"].sort(key=lambda a: (a.start_time, a.delta))
-    
-    # Alle Personen und Arbeitsorte für Filter-Dropdowns laden
-    all_persons = [schemas.Person.model_validate(p) for p in DBPerson.select().order_by(lambda p: (p.l_name, p.f_name))]
-    all_locations = [schemas.LocationOfWorkDetail.model_validate(l) for l in DBLocationOfWork.select().order_by(lambda l: l.name)]
-
     # Template rendern
     return templates.TemplateResponse(
         "index.html",
@@ -159,13 +67,13 @@ def index(request: Request,
             "calendar_weeks": calendar_weeks,
             "year": display_year,
             "month": display_month,
-            "month_name": get_month_name(display_month),
+            "month_name": calendar_service.get_month_name(display_month),
             "today": today,
             "active_filters": active_filters,
             "filter_person_id": filter_person_id,
             "filter_location_id": filter_location_id,
-            "all_persons": all_persons,
-            "all_locations": all_locations
+            "all_persons": filter_options["all_persons"],
+            "all_locations": filter_options["all_locations"]
         }
     )
 
@@ -181,6 +89,9 @@ def calendar_partial(
     filter_location_id: Optional[str] = Query(None, description="Arbeitsort-ID für Filterung")
 ):
     """Liefert das Kalender-Partial für einen bestimmten Monat."""
+    # Initialisiere den CalendarService
+    calendar_service = CalendarService()
+    
     # Wenn kein Jahr/Monat übergeben wurde, nehmen wir den aktuellen
     if year is None or month is None:
         today = date.today()
@@ -188,99 +99,28 @@ def calendar_partial(
         month = today.month
     
     # Monat basierend auf direction anpassen
-    if direction == "today":
-        today = date.today()
-        year = today.year
-        month = today.month
-    elif direction == "prev":
-        if month == 1:
-            year -= 1
-            month = 12
-        else:
-            month -= 1
-    elif direction == "next":
-        if month == 12:
-            year += 1
-            month = 1
-        else:
-            month += 1
+    date_info = calendar_service.adjust_month(year, month, direction)
+    year = date_info["year"]
+    month = date_info["month"]
     
     # Kalenderdaten erstellen
-    calendar_weeks = get_calendar_data(year, month)
+    calendar_weeks = calendar_service.get_calendar_data(year, month)
     
-    # Termine laden und filtern
-    start_date = calendar_weeks[0][0]["date"]
-    end_date = calendar_weeks[-1][-1]["date"]
-    
-    # Basisabfrage
-    appointments_query = DBAppointment.select(
-        lambda a: a.date >= start_date and a.date <= end_date
+    # Termine in den Kalender einfügen mit optionalen Filtern
+    calendar_weeks = calendar_service.fill_calendar_with_appointments(
+        calendar_weeks, 
+        filter_person_id=filter_person_id, 
+        filter_location_id=filter_location_id
     )
     
-    # Filterung nach Person
-    if filter_person_id:
-        try:
-            person_uuid = UUID(filter_person_id) if isinstance(filter_person_id, str) else filter_person_id
-            person = DBPerson.get(id=person_uuid)
-            appointments_query = select(a for a in appointments_query if person in a.persons)
-        except (ValueError, TypeError):
-            pass  # Ungültige UUID ignorieren
+    # Aktive Filter für die Anzeige ermitteln
+    active_filters = calendar_service.get_active_filters(
+        filter_person_id=filter_person_id,
+        filter_location_id=filter_location_id
+    )
     
-    # Filterung nach Arbeitsort
-    if filter_location_id:
-        try:
-            location_uuid = UUID(filter_location_id) if isinstance(filter_location_id, str) else filter_location_id
-            appointments_query = appointments_query.filter(
-                lambda a: a.location.id == location_uuid
-            )
-        except (ValueError, TypeError):
-            pass  # Ungültige UUID ignorieren
-    
-    # Abfrage ausführen
-    appointments = list(appointments_query)
-    
-    # Aktive Filter für die Anzeige speichern
-    active_filters = {
-        "person": None,
-        "location": None
-    }
-    
-    # Namen der gefilterten Entitäten abrufen für die Anzeige
-    if filter_person_id:
-        try:
-            person_uuid = UUID(filter_person_id) if isinstance(filter_person_id, str) else filter_person_id
-            person = DBPerson.get(id=person_uuid)
-            if person:
-                active_filters["person"] = {"id": str(person.id), "name": f"{person.f_name} {person.l_name}"}
-        except (ValueError, TypeError):
-            pass  # Ungültige UUID ignorieren
-    
-    if filter_location_id:
-        try:
-            location_uuid = UUID(filter_location_id) if isinstance(filter_location_id, str) else filter_location_id
-            location = DBLocationOfWork.get(id=location_uuid)
-            if location:
-                active_filters["location"] = {"id": str(location.id), "name": location.name}
-        except (ValueError, TypeError):
-            pass  # Ungültige UUID ignorieren
-    
-    for appointment in appointments:
-        appointment_data = schemas.AppointmentDetail.model_validate(appointment)
-        for week in calendar_weeks:
-            for day in week:
-                if day["date"] == appointment.date:
-                    day["appointments"].append(appointment_data)
-
-    # Termine nach Startzeit sortieren
-    for week in calendar_weeks:
-        for day in week:
-            day["appointments"].sort(key=lambda a: (a.start_time, a.delta))
-
-    # Alle Personen und Arbeitsorte für Filter-Dropdowns laden
-    all_persons = [schemas.Person.model_validate(p) for p in
-                   DBPerson.select().order_by(lambda p: (p.l_name, p.f_name))]
-    all_locations = [schemas.LocationOfWorkDetail.model_validate(l) for l in
-                     DBLocationOfWork.select().order_by(lambda l: l.name)]
+    # Filter-Optionen laden
+    filter_options = calendar_service.get_filter_options()
     
     # Template rendern
     return templates.TemplateResponse(
@@ -290,14 +130,37 @@ def calendar_partial(
             "calendar_weeks": calendar_weeks,
             "year": year,
             "month": month,
-            "month_name": get_month_name(month),
+            "month_name": calendar_service.get_month_name(month),
             "today": date.today(),
             "active_filters": active_filters,
             "filter_person_id": filter_person_id,
             "filter_location_id": filter_location_id,
-            # Alle Personen und Arbeitsorte für Filter-Dropdowns laden
-            "all_persons": all_persons,
-            "all_locations": all_locations
+            "all_persons": filter_options["all_persons"],
+            "all_locations": filter_options["all_locations"]
+        }
+    )
+
+
+@router.get("/api/day-view/{date_str}", response_class=HTMLResponse)
+@db_session
+def day_view_modal(request: Request, date_str: str):
+    """Liefert das Modal-Fragment für die Tagesansicht."""
+    # Initialisiere den CalendarService
+    calendar_service = CalendarService()
+    
+    # Tagesansichtsdaten abrufen
+    day_data = calendar_service.get_day_view_data(date_str)
+    
+    # Fehlerprüfung
+    if "error" in day_data:
+        raise HTTPException(status_code=400, detail=day_data["error"])
+    
+    # Template rendern
+    return templates.TemplateResponse(
+        "day_view_modal.html",
+        {
+            "request": request,
+            **day_data  # Entpacke alle Daten aus day_data
         }
     )
 
@@ -456,52 +319,6 @@ def close_modal(request: Request):
     """Schließt das Modal, indem ein leerer String zurückgegeben wird."""
     return ""
 
-
-@router.get("/api/day-view/{date_str}", response_class=HTMLResponse)
-@db_session
-def day_view_modal(request: Request, date_str: str):
-    """Liefert das Modal-Fragment für die Tagesansicht."""
-    try:
-        selected_date = date.fromisoformat(date_str)
-    except ValueError:
-        raise HTTPException(
-            status_code=400, 
-            detail="Ungültiges Datumsformat. Bitte verwenden Sie das Format YYYY-MM-DD."
-        )
-    
-    # Termine für den ausgewählten Tag laden
-    appointments = list(DBAppointment.select(lambda a: a.date == selected_date).order_by(lambda a: a.start_time))
-    appointments_data = [schemas.AppointmentDetail.model_validate(a) for a in appointments]
-    
-    # Formatierte Datumsangaben
-    day_name = selected_date.strftime("%A")
-    # Deutsche Wochentagsnamen
-    day_names = {
-        "Monday": "Montag",
-        "Tuesday": "Dienstag",
-        "Wednesday": "Mittwoch",
-        "Thursday": "Donnerstag",
-        "Friday": "Freitag",
-        "Saturday": "Samstag",
-        "Sunday": "Sonntag"
-    }
-    day_name = day_names.get(day_name, day_name)
-    
-    formatted_date = selected_date.strftime("%d.%m.%Y")
-    
-    # Template rendern
-    return templates.TemplateResponse(
-        "day_view_modal.html",
-        {
-            "request": request,
-            "date": selected_date,
-            "day_name": day_name,
-            "formatted_date": formatted_date,
-            "appointments": appointments_data,
-            "is_today": selected_date == date.today()
-        }
-    )
-
 @router.get("/persons/{person_id}", response_class=HTMLResponse)
 @db_session
 def person_detail(request: Request, person_id: UUID):
@@ -583,8 +400,7 @@ def search(
                               (
                                       a.location and a.location.name and search_term_lower in a.location.name.lower()) or
 
-                              # 4. Suche in Gästen (siehe Diskussion unten)
-                              # ... hier kommt die Logik für `guests` hin ...
+                              # 4. Suche in Gästen
                               (
                                       search_term_lower in str(a.guests).lower()
                               )

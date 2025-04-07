@@ -1,18 +1,11 @@
-import calendar
-import pprint
-from datetime import date, datetime, timedelta
-from typing import List, Dict, Any, Optional
+from datetime import date
+from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Request, Depends, Query, HTTPException
 from fastapi.responses import HTMLResponse
-from pony.orm import db_session, desc, get, select, exists
 
-from api.models import schemas
-from api.services import CalendarService, AppointmentService, LocationService, PersonService
-from database.models import Appointment as DBAppointment
-from database.models import Person as DBPerson
-from database.models import LocationOfWork as DBLocationOfWork
+from api.services import CalendarService, AppointmentService, LocationService, PersonService, PlanService
 from api import templates
 
 router = APIRouter()
@@ -163,15 +156,11 @@ def day_view_modal(request: Request, date_str: str):
 
 
 @router.get("/plans", response_class=HTMLResponse)
-@db_session
 def plans(request: Request):
     """Seite mit Plänen."""
-    from database.models import Plan as DBPlan
-    from database.models import PlanPeriod as DBPlanPeriod
-    
-    # Alle Pläne aus der Datenbank laden und nach Planperiode gruppieren
-    all_plans = DBPlan.select().order_by(lambda p: p.plan_period.start_date)
-    plans_data = [schemas.PlanDetail.model_validate(p) for p in all_plans]
+    # PlanService nutzen, um alle Pläne zu laden
+    plan_service = PlanService()
+    plans_data = plan_service.get_all_plans()
     
     # Template rendern
     return templates.TemplateResponse(
@@ -184,19 +173,14 @@ def plans(request: Request):
 
 
 @router.get("/plans/{plan_id}", response_class=HTMLResponse)
-@db_session
 def plan_detail(request: Request, plan_id: UUID):
     """Detailseite für einen Plan."""
-    from database.models import Plan as DBPlan
-    
-    # Plan aus der Datenbank laden
-    plan = DBPlan.get(id=plan_id)
+    # PlanService nutzen, um Plandetails zu laden
+    plan_service = PlanService()
+    plan_detail = plan_service.get_plan_detail(plan_id)
 
-    if not plan:
+    if not plan_detail:
         raise HTTPException(status_code=404, detail="Plan nicht gefunden")
-
-    plan_detail = schemas.PlanDetail.model_validate(plan)
-    plan_detail.appointments.sort(key=lambda a: (a.date, a.start_time))
 
     # Template rendern
     return templates.TemplateResponse(

@@ -2,39 +2,36 @@ from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Path, HTTPException
-from pony.orm import db_session, select
 
 from api.models import schemas
-from database.models import Plan as DBPlan
+from api.services import PlanService
 
 router = APIRouter()
 
 @router.get("/", response_model=List[schemas.Plan])
-@db_session
 def get_plans(plan_period_id: Optional[UUID] = None):
     """
     Liefert eine Liste aller Pläne, optional gefiltert nach Planungsperiode.
     """
-    query = select(p for p in DBPlan)
+    # PlanService nutzen
+    plan_service = PlanService()
     
     if plan_period_id:
-        query = query.filter(lambda p: p.plan_period.id == plan_period_id)
-    
-    plans = list(query)
-    return [schemas.Plan.model_validate(p) for p in plans]
+        return plan_service.get_plans_by_period(plan_period_id)
+    else:
+        return plan_service.get_all_plans()
 
 
 @router.get("/{plan_id}", response_model=schemas.PlanDetail)
-@db_session
 def get_plan(plan_id: UUID = Path(...)):
     """
     Liefert Details zu einem bestimmten Plan.
     """
-    plan = DBPlan.get(id=plan_id)
-    if not plan:
-        raise HTTPException(status_code=404, detail="Plan nicht gefunden")
+    # PlanService nutzen
+    plan_service = PlanService()
+    plan_detail = plan_service.get_plan_detail(plan_id)
     
-    # Beim PlanDetail müssen wir die Appointments mit end_time_str anreichern
-    plan_detail = schemas.PlanDetail.model_validate(plan)
+    if not plan_detail:
+        raise HTTPException(status_code=404, detail="Plan nicht gefunden")
     
     return plan_detail

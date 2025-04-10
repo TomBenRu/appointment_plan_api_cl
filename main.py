@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api import app
 from api.routes import web_router
 from database import setup_database
+from api.middleware.error_handler import register_exception_handlers
 
 # Web-Routen einbinden
 app.include_router(web_router)
@@ -17,6 +18,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Exception-Handler registrieren
+register_exception_handlers(app)
 
 @contextlib.asynccontextmanager
 async def lifespan(app):

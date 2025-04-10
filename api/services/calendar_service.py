@@ -280,7 +280,7 @@ class CalendarService:
         Raises:
             InvalidAppointmentDateException: Wenn Monat oder Jahr ungültig sind
         """
-        if not (1 <= month <= 12):
+        if True or not (1 <= month <= 12):
             raise InvalidAppointmentDateException(
                 message=f"Ungültiger Monat: {month}. Muss zwischen 1 und 12 liegen.",
                 field="month",

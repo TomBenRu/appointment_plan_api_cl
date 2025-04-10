@@ -45,6 +45,21 @@ def _is_htmx_request(request: Request) -> bool:
     return path.startswith("/hx/")
 
 
+def _is_web_request(request: Request) -> bool:
+    """
+    Prüft, ob es sich um eine Web-Anfrage (HTML) oder API-Anfrage (JSON) handelt.
+
+    Args:
+        request: Die aktuelle Request.
+
+    Returns:
+        True, wenn es sich um eine Web-Anfrage handelt, sonst False.
+    """
+    # Browser-Anfrage erkennen: Pfade ohne /api/ und ohne /hx/ sind Web-Anfragen
+    path = request.url.path
+    return not (path.startswith("/api/") or path.startswith("/hx/"))
+
+
 async def exception_handler(request: Request, exc: Exception):
     """
     Zentraler Exception-Handler für alle anwendungsspezifischen Exceptions.
@@ -186,21 +201,6 @@ async def exception_handler(request: Request, exc: Exception):
         )
 
 
-def _is_web_request(request: Request) -> bool:
-    """
-    Prüft, ob es sich um eine Web-Anfrage (HTML) oder API-Anfrage (JSON) handelt.
-    
-    Args:
-        request: Die aktuelle Request.
-        
-    Returns:
-        True, wenn es sich um eine Web-Anfrage handelt, sonst False.
-    """
-    # Browser-Anfrage erkennen: Pfade ohne /api/ und ohne /hx/ sind Web-Anfragen
-    path = request.url.path
-    return not (path.startswith("/api/") or path.startswith("/hx/"))
-
-
 async def _render_html_error(
     request: Request,
     status_code: int,
@@ -247,7 +247,7 @@ async def _render_htmx_error(
     details: dict = None
 ) -> HTMLResponse:
     """
-    Rendert ein HTML-Fragment für HTMX-Fehlerantworten.
+    Rendert ein HTML-Fragment für HTMX-Fehlerantworten mit OOB-Swap.
     
     Args:
         request: Die aktuelle Request.
@@ -257,29 +257,26 @@ async def _render_htmx_error(
         details: Optionale Details zum Fehler.
         
     Returns:
-        Eine HTML-Response mit einem einfachen Fehlerfragment und Status 200.
+        Eine HTML-Response mit einem OOB-Swap für die Fehlermeldung.
     """
-    content = templates.TemplateResponse(
-        "htmx_error.html",
+    # Fehlermeldung als OOB-Swap
+    error_response = templates.TemplateResponse(
+        "error_message.html",
         {
             "request": request,
-            "status_code": status_code,
             "title": title,
             "message": message,
             "details": details
         }
     )
     
-    # Wichtig: Status 200 zurückgeben, damit HTMX die Antwort verarbeitet
-    content.status_code = 200
-    
-    # HTMX-Header hinzufügen
-    content.headers["HX-Trigger"] = '{"showMessage": {"level": "error", "message": "' + message + '"}}'  
+    # Status 200 zurückgeben, damit HTMX die Antwort verarbeitet
+    error_response.status_code = 200
     
     # Cache-Header setzen, um Browser-Caching zu deaktivieren
-    content.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    error_response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     
-    return content
+    return error_response
 
 
 def _get_error_title(status_code: int) -> str:

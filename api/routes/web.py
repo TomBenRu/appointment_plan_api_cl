@@ -70,7 +70,7 @@ def index(request: Request,
     )
 
 
-@router.get("/api/calendar-partial", response_class=HTMLResponse)
+@router.get("/hx/calendar-partial", response_class=HTMLResponse)
 def calendar_partial(
     request: Request,
     direction: str = Query(None, description="Richtung (prev/next/today)"),
@@ -132,7 +132,7 @@ def calendar_partial(
     )
 
 
-@router.get("/api/day-view/{date_str}", response_class=HTMLResponse)
+@router.get("/hx/day-view/{date_str}", response_class=HTMLResponse)
 def day_view_modal(request: Request, date_str: str):
     """Liefert das Modal-Fragment für die Tagesansicht."""
     # Initialisiere den CalendarService
@@ -256,7 +256,7 @@ def persons(request: Request):
     )
 
 
-@router.get("/api/appointments/{appointment_id}/detail", response_class=HTMLResponse)
+@router.get("/hx/appointments/{appointment_id}/detail", response_class=HTMLResponse)
 def appointment_detail_modal(request: Request, appointment_id: UUID):
     """Liefert das Modal-Fragment für Termindetails."""
     
@@ -276,7 +276,7 @@ def appointment_detail_modal(request: Request, appointment_id: UUID):
         }
     )
 
-@router.get("/api/close-modal", response_class=HTMLResponse)
+@router.get("/hx/close-modal", response_class=HTMLResponse)
 def close_modal(request: Request):
     """Schließt das Modal, indem ein leerer String zurückgegeben wird."""
     return ""
@@ -310,7 +310,7 @@ def person_detail(request: Request, person_id: UUID):
     )
 
 
-@router.get("/api/search", response_class=HTMLResponse)
+@router.get("/search", response_class=HTMLResponse)
 def search(
     request: Request,
     q: str = Query(..., description="Suchbegriff"),

@@ -21,6 +21,7 @@
     
     <!-- Utility Scripts -->
     <script src="/static/js/colorUtils.js"></script>
+    <script src="/static/js/simple-error-handler.js"></script>
     
     {% block head %}{% endblock %}
 </head>
@@ -41,7 +42,7 @@
                 
                 <!-- Suchleiste -->
                 <div class="lg:w-2/5">
-                    <form action="/api/search" method="GET" class="flex">
+                    <form action="/search" method="GET" class="flex">
                         <div class="relative flex-1">
                             <input 
                                 type="text" 

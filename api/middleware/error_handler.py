@@ -7,8 +7,25 @@ from fastapi.exceptions import RequestValidationError
 from pony.orm.core import ObjectNotFound
 
 from api.exceptions import (
+    # Base exceptions
     AppBaseException, ResourceNotFoundException, ValidationException,
-    ConflictException, PermissionDeniedException
+    ConflictException, PermissionDeniedException,
+    
+    # Appointment exceptions
+    AppointmentNotFoundException, AppointmentOverlapException,
+    InvalidAppointmentDateException, AppointmentUpdateConflictException,
+    
+    # Location exceptions
+    LocationNotFoundException, LocationInUseException,
+    DuplicateLocationException, LocationValidationException,
+    
+    # Person exceptions
+    PersonNotFoundException, PersonInUseException,
+    DuplicatePersonException, PersonValidationException,
+    
+    # Plan exceptions
+    PlanNotFoundException, PlanPeriodNotFoundException, PlanInUseException,
+    DuplicatePlanException, PlanValidationException, PlanPeriodOverlapException
 )
 from api.templates import templates  # Importiere die Jinja2-Templates
 
@@ -25,13 +42,16 @@ async def exception_handler(request: Request, exc: Exception):
         JSONResponse mit entsprechendem Statuscode und Fehlermeldung oder
         HTMLResponse für Web-Anfragen.
     """
-    # Prüfen, ob es sich um eine Web-Anfrage handelt (basierend auf dem Accept-Header oder URL-Pfad)
-    is_web_request = _is_web_request(request)
-    print(f'Debug: {is_web_request=}, {exc=}')
+    # Logging
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Exception: {exc}")
     
-    # Wenn es sich um eine unserer benutzerdefinierten Exceptions handelt
+    # Prüfen, ob es sich um eine Web-Anfrage handelt
+    is_web_request = _is_web_request(request)
+    
+    # Bei benutzerdefinierten Exceptions
     if isinstance(exc, AppBaseException):
-        print(f"Benutzerdefinierte Exception: {exc}")
         if is_web_request:
             return await _render_html_error(
                 request=request,
@@ -46,9 +66,8 @@ async def exception_handler(request: Request, exc: Exception):
                 content=exc.to_dict()
             )
     
-    # FastAPI Validierungsfehler (z.B. bei Pydantic-Modellen)
+    # Bei Validierungsfehlern (Pydantic)
     if isinstance(exc, RequestValidationError):
-        print(f"Validierungsfehler: {exc}")
         status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
         message = "Validierungsfehler bei der Anfrage"
         details = {"validation_errors": exc.errors()}
@@ -71,9 +90,8 @@ async def exception_handler(request: Request, exc: Exception):
                 }
             )
     
-    # PonyORM ObjectNotFound-Exception
+    # Bei PonyORM ObjectNotFound
     if isinstance(exc, ObjectNotFound):
-        print(f"ObjectNotFound: {exc}")
         status_code = status.HTTP_404_NOT_FOUND
         message = "Die angeforderte Ressource wurde nicht gefunden"
         details = {"error": str(exc)}
@@ -96,12 +114,10 @@ async def exception_handler(request: Request, exc: Exception):
                 }
             )
     
-    # Allgemeiner Serverfehler für unbehandelte Exceptions
+    # Bei sonstigen Exceptions
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     message = "Ein interner Serverfehler ist aufgetreten"
     details = {"error": str(exc)}
-
-    print(f"Unbehandelte Exception: {exc}")
     
     if is_web_request:
         return await _render_html_error(
@@ -132,14 +148,9 @@ def _is_web_request(request: Request) -> bool:
     Returns:
         True, wenn es sich um eine Web-Anfrage handelt, sonst False.
     """
-    # Pfadbasierte Erkennung (alle Pfade außer denen, die mit /api beginnen, gelten als Web-Anfragen)
+    # Browser-Anfrage erkennen: Pfade ohne /api/ und ohne /hx/ sind Web-Anfragen
     path = request.url.path
-    if not path.startswith("/api/"):
-        return True
-    
-    # Accept-Header basierte Erkennung als Fallback
-    accept_header = request.headers.get("accept", "")
-    return "text/html" in accept_header and "application/json" not in accept_header
+    return not (path.startswith("/api/") or path.startswith("/hx/"))
 
 
 async def _render_html_error(
@@ -173,6 +184,10 @@ async def _render_html_error(
         }
     )
     content.status_code = status_code
+    
+    # Cache-Header setzen, um Browser-Caching zu deaktivieren
+    content.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    
     return content
 
 
@@ -205,14 +220,8 @@ def register_exception_handlers(app):
     Args:
         app: Die FastAPI-Anwendung.
     """
-    # Eigene Exception-Klassen
+    # Eigene Exception-Klassen (Basisklassen reichen, da Vererbung)
     app.add_exception_handler(AppBaseException, exception_handler)
-    app.add_exception_handler(ResourceNotFoundException, exception_handler)
-    app.add_exception_handler(ValidationException, exception_handler)
-    app.add_exception_handler(ConflictException, exception_handler)
-    app.add_exception_handler(PermissionDeniedException, exception_handler)
-    
-    # FastAPI und PonyORM spezifische Exceptions
     app.add_exception_handler(RequestValidationError, exception_handler)
     app.add_exception_handler(ObjectNotFound, exception_handler)
     

@@ -30,6 +30,21 @@ from api.exceptions import (
 from api.templates import templates  # Importiere die Jinja2-Templates
 
 
+def _is_htmx_request(request: Request) -> bool:
+    """
+    Prüft, ob es sich um eine HTMX-Anfrage handelt.
+    
+    Args:
+        request: Die aktuelle Request.
+        
+    Returns:
+        True, wenn es sich um eine HTMX-Anfrage handelt, sonst False.
+    """
+    # HTMX-Anfragen beginnen mit /hx/
+    path = request.url.path
+    return path.startswith("/hx/")
+
+
 async def exception_handler(request: Request, exc: Exception):
     """
     Zentraler Exception-Handler für alle anwendungsspezifischen Exceptions.
@@ -47,12 +62,21 @@ async def exception_handler(request: Request, exc: Exception):
     logger = logging.getLogger(__name__)
     logger.info(f"Exception: {exc}")
     
-    # Prüfen, ob es sich um eine Web-Anfrage handelt
+    # Prüfen, welche Art von Anfrage vorliegt
     is_web_request = _is_web_request(request)
+    is_htmx_request = _is_htmx_request(request)
     
     # Bei benutzerdefinierten Exceptions
     if isinstance(exc, AppBaseException):
-        if is_web_request:
+        if is_htmx_request:
+            return await _render_htmx_error(
+                request=request,
+                status_code=exc.status_code,
+                title=_get_error_title(exc.status_code),
+                message=exc.message,
+                details=exc.details
+            )
+        elif is_web_request:
             return await _render_html_error(
                 request=request,
                 status_code=exc.status_code,
@@ -72,7 +96,15 @@ async def exception_handler(request: Request, exc: Exception):
         message = "Validierungsfehler bei der Anfrage"
         details = {"validation_errors": exc.errors()}
         
-        if is_web_request:
+        if is_htmx_request:
+            return await _render_htmx_error(
+                request=request,
+                status_code=status_code,
+                title="Validierungsfehler",
+                message=message,
+                details=details
+            )
+        elif is_web_request:
             return await _render_html_error(
                 request=request,
                 status_code=status_code,
@@ -96,7 +128,15 @@ async def exception_handler(request: Request, exc: Exception):
         message = "Die angeforderte Ressource wurde nicht gefunden"
         details = {"error": str(exc)}
         
-        if is_web_request:
+        if is_htmx_request:
+            return await _render_htmx_error(
+                request=request,
+                status_code=status_code,
+                title="Nicht gefunden",
+                message=message,
+                details=details
+            )
+        elif is_web_request:
             return await _render_html_error(
                 request=request,
                 status_code=status_code,
@@ -119,7 +159,15 @@ async def exception_handler(request: Request, exc: Exception):
     message = "Ein interner Serverfehler ist aufgetreten"
     details = {"error": str(exc)}
     
-    if is_web_request:
+    if is_htmx_request:
+        return await _render_htmx_error(
+            request=request,
+            status_code=status_code,
+            title="Serverfehler",
+            message=message,
+            details=details
+        )
+    elif is_web_request:
         return await _render_html_error(
             request=request,
             status_code=status_code,
@@ -184,6 +232,49 @@ async def _render_html_error(
         }
     )
     content.status_code = status_code
+    
+    # Cache-Header setzen, um Browser-Caching zu deaktivieren
+    content.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    
+    return content
+
+
+async def _render_htmx_error(
+    request: Request,
+    status_code: int,
+    title: str,
+    message: str,
+    details: dict = None
+) -> HTMLResponse:
+    """
+    Rendert ein HTML-Fragment für HTMX-Fehlerantworten.
+    
+    Args:
+        request: Die aktuelle Request.
+        status_code: Der HTTP-Statuscode.
+        title: Der Titel der Fehlerseite.
+        message: Die Fehlermeldung.
+        details: Optionale Details zum Fehler.
+        
+    Returns:
+        Eine HTML-Response mit einem einfachen Fehlerfragment und Status 200.
+    """
+    content = templates.TemplateResponse(
+        "htmx_error.html",
+        {
+            "request": request,
+            "status_code": status_code,
+            "title": title,
+            "message": message,
+            "details": details
+        }
+    )
+    
+    # Wichtig: Status 200 zurückgeben, damit HTMX die Antwort verarbeitet
+    content.status_code = 200
+    
+    # HTMX-Header hinzufügen
+    content.headers["HX-Trigger"] = '{"showMessage": {"level": "error", "message": "' + message + '"}}'  
     
     # Cache-Header setzen, um Browser-Caching zu deaktivieren
     content.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"

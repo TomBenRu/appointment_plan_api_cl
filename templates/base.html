@@ -21,7 +21,6 @@
     
     <!-- Utility Scripts -->
     <script src="/static/js/colorUtils.js"></script>
-    <script src="/static/js/simple-error-handler.js"></script>
     
     {% block head %}{% endblock %}
 </head>
@@ -99,7 +98,71 @@
     <!-- Container für Modals -->
     <div id="modal-container"></div>
     
+    <!-- Container für Fehler-Benachrichtigungen -->
+    <div id="notification-container"></div>
+    
     {% block scripts %}{% endblock %}
+    
+    <!-- HTMX Event-Handler -->
+    <script>
+        document.body.addEventListener('htmx:beforeSwap', function(event) {
+            // Bei 4xx und 5xx Fehlern trotzdem den Swap durchführen lassen
+            if(event.detail.xhr.status >= 400) {
+                event.detail.shouldSwap = true;
+                event.detail.isError = false;
+            }
+        });
+        
+        document.body.addEventListener('showMessage', function(event) {
+            // Fehler-Container finden oder erstellen
+            let container = document.getElementById('notification-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'notification-container';
+                document.body.appendChild(container);
+            }
+            
+            // Fehler-Element erstellen
+            const message = event.detail.message;
+            const level = event.detail.level || 'error';
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = `fixed top-24 right-4 z-50 w-96 bg-dark-800 rounded-xl p-4 border shadow-xl text-center`;
+            
+            // Farbe basierend auf Level
+            if (level === 'error') {
+                messageElement.classList.add('border-red-600');
+            } else if (level === 'warning') {
+                messageElement.classList.add('border-yellow-600');
+            } else {
+                messageElement.classList.add('border-primary-600');
+            }
+            
+            const titleElement = document.createElement('div');
+            titleElement.className = level === 'error' ? 'text-red-500 text-xl font-bold mb-2' : 'text-primary-500 text-xl font-bold mb-2';
+            titleElement.textContent = level === 'error' ? 'Fehler' : 'Hinweis';
+            
+            const contentElement = document.createElement('div');
+            contentElement.className = 'text-gray-300 mb-4';
+            contentElement.textContent = message;
+            
+            const closeButton = document.createElement('button');
+            closeButton.className = 'bg-dark-600 hover:bg-dark-500 text-gray-200 px-4 py-2 rounded-md transition-colors duration-200';
+            closeButton.textContent = 'Schließen';
+            closeButton.onclick = function() {
+                messageElement.remove();
+            };
+            
+            messageElement.appendChild(titleElement);
+            messageElement.appendChild(contentElement);
+            messageElement.appendChild(closeButton);
+            
+            container.appendChild(messageElement);
+            
+            // Automatisch nach 8 Sekunden entfernen
+            setTimeout(() => messageElement.remove(), 8000);
+        });
+    </script>
     
     <!-- Mobile Menu Toggle -->
     <script>

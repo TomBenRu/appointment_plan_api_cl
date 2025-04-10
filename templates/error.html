@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ status_code }} - {{ title }}{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[70vh] text-center">
+    <div class="bg-dark-800 border border-dark-600 rounded-xl p-8 max-w-2xl shadow-2xl">
+        <div class="text-6xl text-primary-400 font-bold mb-2">{{ status_code }}</div>
+        <h1 class="text-2xl font-bold text-primary-300 mb-4">{{ title }}</h1>
+        
+        <div class="text-gray-300 mb-8">{{ message }}</div>
+        
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4">
+            <a href="/" class="px-5 py-2 bg-primary-700 hover:bg-primary-600 text-white rounded-lg transition-colors duration-300 shadow-lg">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    Zurück zur Startseite
+                </span>
+            </a>
+            
+            <button onclick="history.back()" class="px-5 py-2 bg-dark-600 hover:bg-dark-500 text-gray-200 rounded-lg transition-colors duration-300">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                    </svg>
+                    Zurück
+                </span>
+            </button>
+        </div>
+        
+        {% if details %}
+        <div class="mt-8 pt-6 border-t border-dark-600">
+            <details class="text-left">
+                <summary class="text-primary-300 cursor-pointer select-none">Details anzeigen</summary>
+                <div class="mt-4 bg-dark-700 p-4 rounded-lg overflow-auto text-gray-300 text-sm">
+                    <pre>{{ details|tojson(indent=2) }}</pre>
+                </div>
+            </details>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

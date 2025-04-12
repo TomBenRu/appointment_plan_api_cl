@@ -29,6 +29,7 @@ class Person(db.Entity):
     f_name = Required(str)
     l_name = Required(str)
     email = PonyOptional(str)
+    project = PonyOptional('Project')
     team_of_employee = PonyOptional('Team')
     teams_of_dispatcher = Set('Team')
     project_of_admin = PonyOptional('Project', reverse='admin')
@@ -41,6 +42,7 @@ class PlanPeriod(db.Entity):
     end_date = Required(date)
     plan = PonyOptional('Plan')
     appointments = Set('Appointment')
+    teams = Set('Team')
 
 class Appointment(db.Entity):
     id = PrimaryKey(UUID, auto=True)
@@ -64,8 +66,6 @@ class Plan(db.Entity):
 class Team(db.Entity):
     id = PrimaryKey(UUID, auto=True)
     name = Required(str, 50)
-    created_at = Required(date, default=lambda: date.today())
-    last_modified = Required(datetime, default=lambda: datetime.utcnow())
     employees = Set(Person, reverse='team_of_employee')
     dispatcher = Required(Person, reverse='teams_of_dispatcher')
     plan_periods = Set(PlanPeriod)
@@ -73,8 +73,6 @@ class Team(db.Entity):
 class Project(db.Entity):
     id = PrimaryKey(UUID, auto=True)
     name = Required(str, 50, unique=True)
-    created_at = Required(date, default=lambda: date.today())
-    last_modified = Required(datetime, precision=0, default=lambda: datetime.utcnow())
     active = Required(bool, default=False)
     persons = Set('Person', reverse='project')
     admin = PonyOptional('Person', reverse='project_of_admin')

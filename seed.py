@@ -12,7 +12,7 @@ import random
 from pony.orm import db_session, commit
 
 from database import setup_database
-from database.models import Address, LocationOfWork, Person, PlanPeriod, Appointment, Plan
+from database.models import Address, LocationOfWork, Person, PlanPeriod, Appointment, Plan, Team, Project
 
 
 @db_session
@@ -110,6 +110,53 @@ def seed_database():
         )
     ]
     
+    # Teams erstellen
+    print("Erstelle Teams...")
+    teams = [
+        Team(
+            name="Baden-Württemberg",
+            dispatcher=persons[0]  # Max als Dispatcher
+        ),
+        Team(
+            name="Mainz",
+            dispatcher=persons[1]  # Erika als Dispatcher
+        )
+    ]
+    
+    # Mitarbeiter zu Teams hinzufügen
+    persons[2].team_of_employee = teams[0]  # John gehört zum Entwicklungsteam
+    persons[4].team_of_employee = teams[0]  # Hans gehört zum Entwicklungsteam
+    persons[3].team_of_employee = teams[1]  # Jane gehört zum Marketingteam
+    persons[5].team_of_employee = teams[1]  # Maria gehört zum Marketingteam
+    
+    # Projekte erstellen
+    print("Erstelle Projekte...")
+    projects = [
+        Project(
+            name="Humor Hilft Heilen",
+            active=True,
+            admin=persons[0]  # Max als Admin
+        ),
+        Project(
+            name="Clinic Clowns China",
+            active=True,
+            admin=persons[1]  # Erika als Admin
+        ),
+        Project(
+            name="Health fror Humor",
+            active=False,
+            admin=persons[0]  # Max als Admin
+        )
+    ]
+    
+    # Personen zu Projekten hinzufügen
+    projects[0].persons.add(persons[2])  # John arbeitet am Website Relaunch
+    projects[0].persons.add(persons[3])  # Jane arbeitet am Website Relaunch
+    projects[1].persons.add(persons[4])  # Hans arbeitet an der Mobile App
+    projects[1].persons.add(persons[5])  # Maria arbeitet an der Mobile App
+    projects[2].persons.add(persons[2])  # John arbeitet auch am Legacy System
+    projects[2].persons.add(persons[4])  # Hans arbeitet auch am Legacy System
+    
     # Planungsperioden erstellen
     print("Erstelle Planungsperioden...")
     today = date.today()
@@ -152,17 +199,21 @@ def seed_database():
         )
     ]
     
+    # Teams mit Planungsperioden verknüpfen
+    teams[0].plan_periods.add(plan_periods[0])
+    teams[1].plan_periods.add(plan_periods[1])
+    
     # Pläne erstellen
     print("Erstelle Pläne...")
     plans = [
         Plan(
-            name="Kundenprojekt Alpha",
-            notes="Wichtiges Projekt mit hoher Priorität",
+            name="Plan Alpha",
+            notes="Bitte pünktlich sein!",
             plan_period=plan_periods[0]
         ),
         Plan(
-            name="Kundenprojekt Beta",
-            notes="Neues Projekt, Kickoff-Phase",
+            name="Plan Beta",
+            notes="Bitte alle Termine beachten.",
             plan_period=plan_periods[1]
         )
     ]

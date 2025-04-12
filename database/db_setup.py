@@ -1,6 +1,8 @@
 import os
 from pony.orm import db_session
 from .models import db
+from .models.entities import *  # Importiert alle Entity-Definitionen
+from .models.auth import *      # Importiert alle Auth-Entity-Definitionen
 
 def setup_database(database_url=None):
     """

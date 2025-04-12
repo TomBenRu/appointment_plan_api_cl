@@ -1,3 +1,16 @@
-from .entities import db, Address, LocationOfWork, Appointment, Plan, PlanPeriod, Person, Team, Project
+from .base import db
+from .entities import Person, Address, LocationOfWork, Appointment, Plan, PlanPeriod, Team, Project
+from .auth import User
 
-__all__ = ['db', 'Address', 'LocationOfWork', 'Appointment', 'Plan', 'PlanPeriod', 'Person', 'Team', 'Project']
+__all__ = [
+    'db',
+    'Person',
+    'Address',
+    'LocationOfWork',
+    'Appointment',
+    'Plan',
+    'PlanPeriod',
+    'Team',
+    'Project',
+    'User'
+]

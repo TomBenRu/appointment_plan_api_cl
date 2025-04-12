@@ -1,12 +1,10 @@
 import datetime
 from datetime import date, time, timedelta
 from uuid import UUID
-import json
-from typing import Optional, List
 
-from pony.orm import Database, Required, Optional as PonyOptional, Set, Json, PrimaryKey
+from pony.orm import Required, Optional as PonyOptional, Set, Json, PrimaryKey
 
-db = Database()
+from .base import db
 
 def utcnow_naive():
     return datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
@@ -34,6 +32,7 @@ class Person(db.Entity):
     teams_of_dispatcher = Set('Team')
     project_of_admin = PonyOptional('Project', reverse='admin')
     appointments = Set('Appointment')
+    auth_user = PonyOptional('User')
 
 class PlanPeriod(db.Entity):
     id = PrimaryKey(UUID, auto=True)

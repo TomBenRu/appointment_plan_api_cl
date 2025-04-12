@@ -8,6 +8,9 @@ from pony.orm import Database, Required, Optional as PonyOptional, Set, Json, Pr
 
 db = Database()
 
+def utcnow_naive():
+    return datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+
 class Address(db.Entity):
     id = PrimaryKey(UUID, auto=True)
     street = Required(str)
@@ -26,6 +29,9 @@ class Person(db.Entity):
     f_name = Required(str)
     l_name = Required(str)
     email = PonyOptional(str)
+    team_of_employee = PonyOptional('Team')
+    teams_of_dispatcher = Set('Team')
+    project_of_admin = PonyOptional('Project', reverse='admin')
     appointments = Set('Appointment')
 
 class PlanPeriod(db.Entity):
@@ -54,3 +60,21 @@ class Plan(db.Entity):
     notes = PonyOptional(str, default="")
     plan_period = Required(PlanPeriod)
     appointments = Set(Appointment)
+
+class Team(db.Entity):
+    id = PrimaryKey(UUID, auto=True)
+    name = Required(str, 50)
+    created_at = Required(date, default=lambda: date.today())
+    last_modified = Required(datetime, default=lambda: datetime.utcnow())
+    employees = Set(Person, reverse='team_of_employee')
+    dispatcher = Required(Person, reverse='teams_of_dispatcher')
+    plan_periods = Set(PlanPeriod)
+
+class Project(db.Entity):
+    id = PrimaryKey(UUID, auto=True)
+    name = Required(str, 50, unique=True)
+    created_at = Required(date, default=lambda: date.today())
+    last_modified = Required(datetime, precision=0, default=lambda: datetime.utcnow())
+    active = Required(bool, default=False)
+    persons = Set('Person', reverse='project')
+    admin = PonyOptional('Person', reverse='project_of_admin')

@@ -1,0 +1,71 @@
+<!-- Login Modal -->
+<div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-dark-800 rounded-xl p-6 max-w-md w-full mx-4 border border-primary-700 shadow-2xl">
+        <!-- Header mit Titel -->
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-primary-300 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Anmeldung erforderlich
+            </h2>
+            
+            <!-- Schließen-Button (nur verfügbar, wenn Login-Modal nicht erforderlich) -->
+            {% if not show_login_modal %}
+            <button 
+                class="text-gray-400 hover:text-white"
+                onclick="document.getElementById('login-modal').classList.add('hidden');"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            {% endif %}
+        </div>
+        
+        <!-- Meldung zur Rollenanforderung -->
+        <div class="mb-4 text-center">
+            <p class="text-gray-300">Für den Zugriff auf diese Seite ist eine Anmeldung erforderlich.</p>
+            {% if required_role %}
+                <p class="text-primary-200 mt-2">Benötigte Rolle: <span class="font-bold">{{ required_role }}</span></p>
+            {% endif %}
+        </div>
+        
+        <!-- Anmeldeformular -->
+        <form id="login-form" class="space-y-4" hx-post="/api/auth/web-token" hx-target="#login-result">
+            <div>
+                <label for="username" class="block text-primary-200 mb-1">Benutzername</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    class="w-full bg-dark-700 text-white border border-dark-600 focus:border-primary-500 rounded-lg px-4 py-2 focus:outline-none"
+                    required
+                >
+            </div>
+            
+            <div>
+                <label for="password" class="block text-primary-200 mb-1">Passwort</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="w-full bg-dark-700 text-white border border-dark-600 focus:border-primary-500 rounded-lg px-4 py-2 focus:outline-none"
+                    required
+                >
+            </div>
+
+            <!-- Fehlermeldungen oder Erfolgsmeldungen -->
+            <div id="login-result"></div>
+            
+            <div class="flex justify-end mt-6">
+                <button 
+                    type="submit" 
+                    class="bg-primary-700 hover:bg-primary-600 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200"
+                >
+                    Anmelden
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

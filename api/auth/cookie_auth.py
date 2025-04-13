@@ -97,6 +97,7 @@ class WebRoleChecker:
         return user
 
 # Vordefinierte Abhängigkeit für Web-Routen
+require_web_guest = WebRoleChecker(Role.GUEST)
 require_web_employee = WebRoleChecker(Role.EMPLOYEE)
 require_web_dispatcher = WebRoleChecker(Role.DISPATCHER)
 require_web_admin = WebRoleChecker(Role.ADMIN)

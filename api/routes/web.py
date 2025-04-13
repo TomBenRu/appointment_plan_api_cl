@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse
 
 from api.services import CalendarService, AppointmentService, LocationService, PersonService, PlanService
 from api.templates import templates
-from api.auth.cookie_auth import require_web_employee, get_current_user_from_cookie
+from api.auth.cookie_auth import require_web_employee, get_current_user_from_cookie, require_web_guest
 from api.auth.models import User
 
 router = APIRouter()
@@ -16,7 +16,7 @@ router = APIRouter()
 @router.get("/", response_class=HTMLResponse)
 async def index(
     request: Request, 
-    user: Optional[User] = Depends(require_web_employee),
+    user: Optional[User] = Depends(require_web_guest),
     year: Optional[int] = Query(None),
     month: Optional[int] = Query(None),
     filter_person_id: Optional[str] = Query(None), 
@@ -85,7 +85,7 @@ async def index(
 @router.get("/hx/calendar-partial", response_class=HTMLResponse)
 async def calendar_partial(
     request: Request,
-    user: Optional[User] = Depends(get_current_user_from_cookie),
+    user: Optional[User] = Depends(require_web_employee),
     direction: str = Query(None, description="Richtung (prev/next/today)"),
     year: int = Query(None, description="Jahr"),
     month: int = Query(None, description="Monat (1-12)"),

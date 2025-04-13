@@ -5,12 +5,16 @@ from .appointments import router as appointments_router
 from .plans import router as plans_router
 from .locations import router as locations_router
 from .auth import router as auth_router
+from .web_auth import router as web_auth_router
 from .web import router as web_router
 
 api_router = APIRouter()
 
 # Auth-Router ohne Abhängigkeiten
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
+
+# Web-Auth-Router ohne Abhängigkeiten
+api_router.include_router(web_auth_router, prefix="/auth", tags=["web-auth"])
 
 # API-Routen mit Rollenabhängigkeit (employee)
 api_router.include_router(

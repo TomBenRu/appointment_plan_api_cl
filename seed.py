@@ -124,10 +124,10 @@ def seed_database():
     ]
     
     # Mitarbeiter zu Teams hinzufügen
-    persons[2].team_of_employee = teams[0]  # John gehört zum Entwicklungsteam
-    persons[4].team_of_employee = teams[0]  # Hans gehört zum Entwicklungsteam
-    persons[3].team_of_employee = teams[1]  # Jane gehört zum Marketingteam
-    persons[5].team_of_employee = teams[1]  # Maria gehört zum Marketingteam
+    persons[2].team_of_employee = teams[0]  # John gehört zum Team Baden-Württemberg
+    persons[4].team_of_employee = teams[0]  # Hans gehört zum Team Baden-Württemberg
+    persons[3].team_of_employee = teams[1]  # Jane gehört zum 'Team Mainz'
+    persons[5].team_of_employee = teams[1]  # Maria gehört zum 'Team Mainz'
     
     # Projekte erstellen
     print("Erstelle Projekte...")
@@ -145,7 +145,7 @@ def seed_database():
         Project(
             name="Health fror Humor",
             active=False,
-            admin=persons[0]  # Max als Admin
+            admin=persons[3]  # Max als Admin
         )
     ]
     

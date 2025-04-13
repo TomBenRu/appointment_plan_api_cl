@@ -70,6 +70,27 @@
                     <a href="/plans" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Pläne</a>
                     <a href="/locations" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Arbeitsorte</a>
                     <a href="/persons" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Personen</a>
+                    
+                    <!-- Login/Logout-Button -->
+                    {% if user %}
+                    <a href="/api/auth/logout" class="ml-4 px-4 py-2 bg-primary-800 text-primary-100 hover:bg-primary-700 rounded-md transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Abmelden
+                    </a>
+                    {% else %}
+                    <button 
+                        id="login-button"
+                        class="ml-4 px-4 py-2 bg-primary-800 text-primary-100 hover:bg-primary-700 rounded-md transition-all duration-200 flex items-center"
+                        onclick="document.getElementById('login-modal').classList.remove('hidden');"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        Anmelden
+                    </button>
+                    {% endif %}
                 </nav>
             </div>
             
@@ -80,6 +101,20 @@
                     <a href="/plans" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Pläne</a>
                     <a href="/locations" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Arbeitsorte</a>
                     <a href="/persons" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Personen</a>
+                    
+                    <!-- Login/Logout-Button (Mobile) -->
+                    {% if user %}
+                    <a href="/api/auth/logout" class="px-4 py-2 bg-primary-800 text-primary-100 hover:bg-primary-700 rounded-md transition-all duration-200">
+                        Abmelden
+                    </a>
+                    {% else %}
+                    <button 
+                        class="px-4 py-2 bg-primary-800 text-primary-100 hover:bg-primary-700 rounded-md transition-all duration-200"
+                        onclick="document.getElementById('login-modal').classList.remove('hidden');"
+                    >
+                        Anmelden
+                    </button>
+                    {% endif %}
                 </div>
             </nav>
         </div>
@@ -100,6 +135,15 @@
     
     <!-- Container für Fehler-Benachrichtigungen -->
     <div id="error-container"></div>
+    
+    <!-- Login-Modal (standardmäßig ausgeblendet) -->
+    {% if show_login_modal %}
+        {% include "login_modal.html" %}
+    {% else %}
+        <div id="login-modal" class="hidden">
+            {% include "login_modal.html" %}
+        </div>
+    {% endif %}
     
     {% block scripts %}{% endblock %}
     

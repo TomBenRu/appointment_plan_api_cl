@@ -13,14 +13,14 @@ from api.auth import get_password_hash
 from api.auth.roles import Role
 
 @db_session
-def create_admin_user(username: str, password: str, person_id: UUID):
+def create_admin_user(username: str, password: str, person_full_name: str):
     """
     Erstellt einen neuen Administrator-Benutzer.
     
     Args:
         username: Der Benutzername
         password: Das Passwort
-        person_id: Die ID der Person, mit der der Benutzer verknüpft wird
+        person_full_name: Der vollständige Name der Person, mit der der Benutzer verknüpft wird
     """
     # Prüfen, ob der Benutzername bereits existiert
     if User.get(username=username):
@@ -28,9 +28,10 @@ def create_admin_user(username: str, password: str, person_id: UUID):
         return False
     
     # Prüfen, ob die Person existiert
-    person = Person.get(id=person_id)
+    f_name, l_name = person_full_name.split(" ")
+    person = Person.get(l_name=l_name, f_name=f_name)
     if not person:
-        print(f"Person mit ID '{person_id}' nicht gefunden.")
+        print(f"Person mit Namen '{person_full_name}' nicht gefunden.")
         return False
     
     # Passwort hashen
@@ -59,18 +60,13 @@ if __name__ == "__main__":
     username = input("Benutzername: ")
     
     # Passwort abfragen (wird nicht angezeigt)
-    password = getpass.getpass("Passwort: ")
+    password = input("Passwort: ")
     
     # Personen-ID abfragen
-    person_id_str = input("Personen-ID (UUID): ")
-    try:
-        person_id = UUID(person_id_str)
-    except ValueError:
-        print("Ungültige UUID-Format.")
-        sys.exit(1)
+    person_full_name = input("Personen-Full-Name: ")
     
     # Admin-Benutzer erstellen
-    if create_admin_user(username, password, person_id):
+    if create_admin_user(username, password, person_full_name):
         print("Admin-Benutzer erfolgreich erstellt.")
     else:
         print("Fehler beim Erstellen des Admin-Benutzers.")

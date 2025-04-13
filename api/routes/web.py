@@ -2,21 +2,26 @@ from datetime import date
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Request, Query, HTTPException
+from fastapi import APIRouter, Request, Query, HTTPException, Depends
 from fastapi.responses import HTMLResponse
 
 from api.services import CalendarService, AppointmentService, LocationService, PersonService, PlanService
 from api.templates import templates
+from api.auth.cookie_auth import require_web_employee, get_current_user_from_cookie
+from api.auth.models import User
 
 router = APIRouter()
 
 
 @router.get("/", response_class=HTMLResponse)
-def index(request: Request, 
-          year: Optional[int] = Query(None),
-          month: Optional[int] = Query(None),
-          filter_person_id: Optional[str] = Query(None), 
-          filter_location_id: Optional[str] = Query(None)):
+async def index(
+    request: Request, 
+    user: Optional[User] = Depends(require_web_employee),
+    year: Optional[int] = Query(None),
+    month: Optional[int] = Query(None),
+    filter_person_id: Optional[str] = Query(None), 
+    filter_location_id: Optional[str] = Query(None)
+):
     """Homepage mit Kalenderansicht."""
     # Initialisiere den CalendarService
     calendar_service = CalendarService()
@@ -51,6 +56,10 @@ def index(request: Request,
     # Filter-Optionen laden
     filter_options = calendar_service.get_filter_options()
     
+    # Prüfen, ob login_modal angezeigt werden soll
+    show_login_modal = getattr(request.state, "show_login_modal", False)
+    required_role = getattr(request.state, "required_role", None)
+    
     # Template rendern
     return templates.TemplateResponse(
         "index.html",
@@ -65,14 +74,18 @@ def index(request: Request,
             "filter_person_id": filter_person_id,
             "filter_location_id": filter_location_id,
             "all_persons": filter_options["all_persons"],
-            "all_locations": filter_options["all_locations"]
+            "all_locations": filter_options["all_locations"],
+            "show_login_modal": show_login_modal,
+            "required_role": required_role,
+            "user": user
         }
     )
 
 
 @router.get("/hx/calendar-partial", response_class=HTMLResponse)
-def calendar_partial(
+async def calendar_partial(
     request: Request,
+    user: Optional[User] = Depends(get_current_user_from_cookie),
     direction: str = Query(None, description="Richtung (prev/next/today)"),
     year: int = Query(None, description="Jahr"),
     month: int = Query(None, description="Monat (1-12)"),
@@ -127,13 +140,18 @@ def calendar_partial(
             "filter_person_id": filter_person_id,
             "filter_location_id": filter_location_id,
             "all_persons": filter_options["all_persons"],
-            "all_locations": filter_options["all_locations"]
+            "all_locations": filter_options["all_locations"],
+            "user": user
         }
     )
 
 
 @router.get("/hx/day-view/{date_str}", response_class=HTMLResponse)
-def day_view_modal(request: Request, date_str: str):
+async def day_view_modal(
+    request: Request, 
+    date_str: str,
+    user: Optional[User] = Depends(require_web_employee)
+):
     """Liefert das Modal-Fragment für die Tagesansicht."""
     # Initialisiere den CalendarService
     calendar_service = CalendarService()
@@ -150,13 +168,17 @@ def day_view_modal(request: Request, date_str: str):
         "day_view_modal.html",
         {
             "request": request,
-            **day_data  # Entpacke alle Daten aus day_data
+            **day_data,  # Entpacke alle Daten aus day_data
+            "user": user
         }
     )
 
 
 @router.get("/plans", response_class=HTMLResponse)
-def plans(request: Request):
+async def plans(
+    request: Request,
+    user: Optional[User] = Depends(require_web_employee)
+):
     """Seite mit Plänen."""
     # PlanService nutzen, um alle Pläne zu laden
     plan_service = PlanService()
@@ -167,13 +189,18 @@ def plans(request: Request):
         "plans.html",
         {
             "request": request,
-            "plans": plans_data
+            "plans": plans_data,
+            "user": user
         }
     )
 
 
 @router.get("/plans/{plan_id}", response_class=HTMLResponse)
-def plan_detail(request: Request, plan_id: UUID):
+async def plan_detail(
+    request: Request, 
+    plan_id: UUID,
+    user: Optional[User] = Depends(require_web_employee)
+):
     """Detailseite für einen Plan."""
     # PlanService nutzen, um Plandetails zu laden
     plan_service = PlanService()
@@ -187,13 +214,17 @@ def plan_detail(request: Request, plan_id: UUID):
         "plan_detail.html",
         {
             "request": request,
-            "plan": plan_detail
+            "plan": plan_detail,
+            "user": user
         }
     )
 
 
 @router.get("/locations", response_class=HTMLResponse)
-def locations(request: Request):
+async def locations(
+    request: Request,
+    user: Optional[User] = Depends(require_web_employee)
+):
     """Seite mit Arbeitsorten."""
     # LocationService nutzen, um alle Arbeitsorte zu laden
     location_service = LocationService()
@@ -204,13 +235,18 @@ def locations(request: Request):
         "locations.html",
         {
             "request": request,
-            "locations": locations_data
+            "locations": locations_data,
+            "user": user
         }
     )
 
 
 @router.get("/locations/{location_id}", response_class=HTMLResponse)
-def location_detail(request: Request, location_id: UUID):
+async def location_detail(
+    request: Request, 
+    location_id: UUID,
+    user: Optional[User] = Depends(require_web_employee)
+):
     """Detailseite für einen Arbeitsort."""
     
     # LocationService und AppointmentService nutzen
@@ -233,13 +269,17 @@ def location_detail(request: Request, location_id: UUID):
             "request": request,
             "location": location_detail,
             "future_appointments": future_appointments_data,
-            "past_appointments": past_appointments_data
+            "past_appointments": past_appointments_data,
+            "user": user
         }
     )
 
 
 @router.get("/persons", response_class=HTMLResponse)
-def persons(request: Request):
+async def persons(
+    request: Request,
+    user: Optional[User] = Depends(require_web_employee)
+):
     """Seite mit allen Personen."""
     
     # PersonService nutzen, um alle Personen zu laden
@@ -251,13 +291,18 @@ def persons(request: Request):
         "persons.html",
         {
             "request": request,
-            "persons": persons_data
+            "persons": persons_data,
+            "user": user
         }
     )
 
 
 @router.get("/hx/appointments/{appointment_id}/detail", response_class=HTMLResponse)
-def appointment_detail_modal(request: Request, appointment_id: UUID):
+async def appointment_detail_modal(
+    request: Request, 
+    appointment_id: UUID,
+    user: Optional[User] = Depends(require_web_employee)
+):
     """Liefert das Modal-Fragment für Termindetails."""
     
     # AppointmentService nutzen
@@ -272,17 +317,22 @@ def appointment_detail_modal(request: Request, appointment_id: UUID):
         "appointment_detail_modal.html",
         {
             "request": request,
-            "appointment": appointment_detail
+            "appointment": appointment_detail,
+            "user": user
         }
     )
 
 @router.get("/hx/close-modal", response_class=HTMLResponse)
-def close_modal(request: Request):
+async def close_modal(request: Request):
     """Schließt das Modal, indem ein leerer String zurückgegeben wird."""
     return ""
 
 @router.get("/persons/{person_id}", response_class=HTMLResponse)
-def person_detail(request: Request, person_id: UUID):
+async def person_detail(
+    request: Request, 
+    person_id: UUID,
+    user: Optional[User] = Depends(require_web_employee)
+):
     """Detailseite für eine Person."""
     
     # PersonService und AppointmentService nutzen
@@ -305,14 +355,16 @@ def person_detail(request: Request, person_id: UUID):
             "request": request,
             "person": person_detail,
             "future_appointments": future_appointments_data,
-            "past_appointments": past_appointments_data
+            "past_appointments": past_appointments_data,
+            "user": user
         }
     )
 
 
 @router.get("/search", response_class=HTMLResponse)
-def search(
+async def search(
     request: Request,
+    user: Optional[User] = Depends(require_web_employee),
     q: str = Query(..., description="Suchbegriff"),
     type: Optional[str] = Query(None, description="Entitätstyp (appointment, person, location)")
 ):
@@ -353,6 +405,7 @@ def search(
             "query": q,
             "type": type,
             "results": results,
-            "total_count": len(results["appointments"]) + len(results["persons"]) + len(results["locations"])
+            "total_count": len(results["appointments"]) + len(results["persons"]) + len(results["locations"]),
+            "user": user
         }
     )

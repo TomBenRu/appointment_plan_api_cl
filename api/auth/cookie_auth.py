@@ -69,12 +69,13 @@ async def get_current_user_from_cookie(token: Optional[str] = Depends(get_token_
 
 class WebRoleChecker:
     """
-    Überprüft, ob ein Benutzer die erforderlichen Rollen hat und leitet zur Login-Seite um, wenn nicht.
+    Überprüft, ob ein Benutzer die erforderlichen Rollen hat.
+    Wirft einen 401-Fehler, wenn die Authentifizierung/Autorisierung fehlschlägt.
     """
     def __init__(self, required_role: Role):
         self.required_role = required_role
     
-    async def __call__(self, request: Request, user: Optional[User] = Depends(get_current_user_from_cookie)) -> Optional[User]:
+    async def __call__(self, request: Request, user: Optional[User] = Depends(get_current_user_from_cookie)) -> User:
         """
         Überprüft, ob der Benutzer die erforderliche Rolle hat.
         
@@ -83,14 +84,38 @@ class WebRoleChecker:
             user: Der zu überprüfende Benutzer oder None
             
         Returns:
-            Das Benutzer-Objekt, wenn die Autorisierung erfolgreich ist, oder None
+            Das Benutzer-Objekt, wenn die Autorisierung erfolgreich ist
+            
+        Raises:
+            HTTPException: Wenn die Authentifizierung oder Autorisierung fehlschlägt
         """
-        # Wenn kein Benutzer vorhanden ist oder die Rolle nicht ausreicht
-        if user is None or not Role.has_permission(self.required_role, user.role):
-            # Wir markieren die Request zur Anzeige des Login-Modals
+        # Information über die erforderliche Rolle in der Request speichern
+        # (wird vom Exception-Handler verwendet)
+        request.state.required_role = self.required_role
+        
+        # Authentifizierung prüfen
+        if user is None:
+            # Wir speichern in der Request-State, dass das Login-Modal angezeigt werden soll
+            # (der Exception-Handler wird dies verwenden)
             request.state.show_login_modal = True
-            request.state.required_role = self.required_role
-            return None
+            
+            # 401-Fehler werfen
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Anmeldung erforderlich"
+            )
+            
+        # Autorisierung prüfen
+        if not Role.has_permission(self.required_role, user.role):
+            # Wir speichern in der Request-State, dass das Login-Modal angezeigt werden soll
+            # (der Exception-Handler wird dies verwenden)
+            request.state.show_login_modal = True
+            
+            # 403-Fehler werfen
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Unzureichende Berechtigungen. Rolle {user.role} hat keinen Zugriff auf {self.required_role}."
+            )
         
         # Benutzer hat ausreichende Berechtigungen
         request.state.show_login_modal = False

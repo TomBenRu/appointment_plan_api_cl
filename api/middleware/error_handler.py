@@ -1,8 +1,8 @@
 """
 Middleware zur Behandlung von Exceptions.
 """
-from fastapi import Request, status
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi import Request, status, HTTPException
+from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
 from fastapi.exceptions import RequestValidationError
 from pony.orm.core import ObjectNotFound
 
@@ -40,9 +40,8 @@ def _is_htmx_request(request: Request) -> bool:
     Returns:
         True, wenn es sich um eine HTMX-Anfrage handelt, sonst False.
     """
-    # HTMX-Anfragen beginnen mit /hx/
-    path = request.url.path
-    return path.startswith("/hx/")
+    # HTMX setzt den HX-Request Header
+    return "HX-Request" in request.headers
 
 
 def _is_web_request(request: Request) -> bool:
@@ -55,9 +54,9 @@ def _is_web_request(request: Request) -> bool:
     Returns:
         True, wenn es sich um eine Web-Anfrage handelt, sonst False.
     """
-    # Browser-Anfrage erkennen: Pfade ohne /api/ und ohne /hx/ sind Web-Anfragen
+    # Browser-Anfrage erkennen: Pfade ohne /api/ sind Web-Anfragen
     path = request.url.path
-    return not (path.startswith("/api/") or path.startswith("/hx/"))
+    return not path.startswith("/api/")
 
 
 async def exception_handler(request: Request, exc: Exception):
@@ -80,6 +79,89 @@ async def exception_handler(request: Request, exc: Exception):
     # Prüfen, welche Art von Anfrage vorliegt
     is_web_request = _is_web_request(request)
     is_htmx_request = _is_htmx_request(request)
+    
+    # Bei HTTPException (inkl. 401/403 für Auth)
+    if isinstance(exc, HTTPException):
+        # Authorization-Fehler speziell behandeln
+        if exc.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN):
+            # Für normale Web-Anfragen
+            if is_web_request and not is_htmx_request:
+                # Login-Modal anzeigen (der Status ist bereits in der Request gespeichert)
+                # Für reguläre Anfragen zur Startseite weiterleiten
+                if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+                    # Wenn der Pfad nicht die Startseite ist, dorthin umleiten
+                    if request.url.path != "/":
+                        return RedirectResponse(
+                            url="/",
+                            status_code=status.HTTP_303_SEE_OTHER
+                        )
+                    
+                    # Bei 401 auf der Startseite nur 200 zurückgeben und Template rendern
+                    # (das Login-Modal wird vom Template angezeigt)
+                    response = templates.TemplateResponse(
+                        "index.html",
+                        {
+                            "request": request,
+                            "show_login_modal": True,
+                            "required_role": getattr(request.state, "required_role", None)
+                        }
+                    )
+                    return response
+                
+                # Bei 403 eine normale Fehlerseite anzeigen
+                return await _render_html_error(
+                    request=request,
+                    status_code=exc.status_code,
+                    title=_get_error_title(exc.status_code),
+                    message=exc.detail,
+                    details={}
+                )
+            
+            # Für HTMX-Anfragen ein Fragment zurückgeben, das zur Anmeldeseite umleitet
+            elif is_htmx_request:
+                return await _render_htmx_error(
+                    request=request,
+                    status_code=exc.status_code,
+                    title=_get_error_title(exc.status_code),
+                    message=exc.detail,
+                    details={}
+                )
+            
+            # Für API-Anfragen eine normale JSON-Response
+            else:
+                return JSONResponse(
+                    status_code=exc.status_code,
+                    content={
+                        "message": exc.detail,
+                        "status_code": exc.status_code
+                    }
+                )
+                
+        # Alle anderen HTTPExceptions normal behandeln
+        if is_htmx_request:
+            return await _render_htmx_error(
+                request=request,
+                status_code=exc.status_code,
+                title=_get_error_title(exc.status_code),
+                message=exc.detail,
+                details={}
+            )
+        elif is_web_request:
+            return await _render_html_error(
+                request=request,
+                status_code=exc.status_code,
+                title=_get_error_title(exc.status_code),
+                message=exc.detail,
+                details={}
+            )
+        else:
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={
+                    "message": exc.detail,
+                    "status_code": exc.status_code
+                }
+            )
     
     # Bei benutzerdefinierten Exceptions
     if isinstance(exc, AppBaseException):
@@ -312,6 +394,7 @@ def register_exception_handlers(app):
     app.add_exception_handler(AppBaseException, exception_handler)
     app.add_exception_handler(RequestValidationError, exception_handler)
     app.add_exception_handler(ObjectNotFound, exception_handler)
+    app.add_exception_handler(HTTPException, exception_handler)  # HTTPException explizit hinzufügen
     
     # Allgemeiner Fallback für alle anderen Exceptions
     app.add_exception_handler(Exception, exception_handler)

@@ -116,27 +116,6 @@ async def exception_handler(request: Request, exc: Exception):
                     message=exc.detail,
                     details={}
                 )
-            
-            # Für HTMX-Anfragen ein Fragment zurückgeben, das zur Anmeldeseite umleitet
-            elif is_htmx_request:
-                return await _render_htmx_error(
-                    request=request,
-                    status_code=exc.status_code,
-                    title=_get_error_title(exc.status_code),
-                    message=exc.detail,
-                    details={}
-                )
-            
-            # Für API-Anfragen eine normale JSON-Response
-            else:
-                return JSONResponse(
-                    status_code=exc.status_code,
-                    content={
-                        "message": exc.detail,
-                        "status_code": exc.status_code
-                    }
-                )
-                
         # Alle anderen HTTPExceptions normal behandeln
         if is_htmx_request:
             return await _render_htmx_error(

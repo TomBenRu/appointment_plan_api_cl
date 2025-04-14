@@ -18,9 +18,6 @@ logger = logging.getLogger(__name__)
 # Debug-Route aktivieren
 app.router.route_class = DebugRoute
 
-# Web-Routen einbinden
-app.include_router(web_router)
-
 # CORS-Middleware hinzufügen
 app.add_middleware(
     CORSMiddleware,

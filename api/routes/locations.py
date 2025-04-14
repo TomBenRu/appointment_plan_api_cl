@@ -8,7 +8,7 @@ from api.services import LocationService
 
 router = APIRouter()
 
-@router.get("/", response_model=List[schemas.LocationOfWork])
+@router.get("/", response_model=List[schemas.LocationOfWorkDetail])
 def get_locations():
     """
     Liefert eine Liste aller Arbeitsorte.

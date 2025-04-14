@@ -5,7 +5,7 @@ from .oauth2 import (
     get_current_user, get_current_active_user, 
     get_password_hash, verify_password, get_user
 )
-from .dependencies import (
+from .api_oauth import (
     RoleChecker, require_employee, require_dispatcher,
     require_admin, require_supervisor, allow_guest
 )

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 import os
 
-from .routes import api_router
+from .routes import api_router, web_router
 
 # API-Objekt erstellen
 app = FastAPI(
@@ -13,6 +13,9 @@ app = FastAPI(
 
 # API-Router einbinden
 app.include_router(api_router, prefix="/api")
+
+# Web-Routen einbinden
+app.include_router(web_router, tags=["web"])
 
 # Statische Dateien einbinden
 static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")

@@ -6,7 +6,7 @@ class Role(str, Enum):
     EMPLOYEE = "employee"
     DISPATCHER = "dispatcher"
     ADMIN = "admin"
-    SUPERVISER = "superviser"
+    SUPERVISOR = "supervisor"
     
     @classmethod
     def has_permission(cls, required_role: "Role", user_role: "Role") -> bool:

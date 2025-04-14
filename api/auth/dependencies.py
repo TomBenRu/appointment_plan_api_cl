@@ -38,5 +38,5 @@ class RoleChecker:
 require_employee = RoleChecker(Role.EMPLOYEE)
 require_dispatcher = RoleChecker(Role.DISPATCHER)
 require_admin = RoleChecker(Role.ADMIN)
-require_superviser = RoleChecker(Role.SUPERVISER)
+require_supervisor = RoleChecker(Role.SUPERVISOR)
 allow_guest = RoleChecker(Role.GUEST)

@@ -19,6 +19,6 @@ class Role(str, Enum):
             cls.EMPLOYEE: 2,
             cls.DISPATCHER: 3,
             cls.ADMIN: 4,
-            cls.SUPERVISER: 5
+            cls.SUPERVISOR: 5
         }
         return role_hierarchy.get(user_role, 0) >= role_hierarchy.get(required_role, 0)

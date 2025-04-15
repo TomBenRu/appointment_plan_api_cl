@@ -25,24 +25,15 @@ class AppointmentService:
     def get_appointment_detail(appointment_id: UUID) -> schemas.AppointmentDetail:
         """
         Liefert Details zu einem bestimmten Termin.
-        
-        Args:
-            appointment_id: Die UUID des gesuchten Termins
-            
-        Returns:
-            Details zum Termin
-            
-        Raises:
-            AppointmentNotFoundException: Wenn der Termin nicht gefunden wurde
+        Args: appointment_id: Die UUID des gesuchten Termins
+        Returns: Details zum Termin
+        Raises: AppointmentNotFoundException: Wenn der Termin nicht gefunden wurde
         """
-        try:
-            appointment = DBAppointment.get(id=appointment_id)
-            if not appointment:
-                raise AppointmentNotFoundException(appointment_id=appointment_id)
-            
-            return schemas.AppointmentDetail.model_validate(appointment)
-        except ObjectNotFound:
+        appointment = DBAppointment.get(id=appointment_id)
+        if not appointment:
             raise AppointmentNotFoundException(appointment_id=appointment_id)
+
+        return schemas.AppointmentDetail.model_validate(appointment)
     
     @staticmethod
     @db_session
@@ -92,9 +83,8 @@ class AppointmentService:
         
         if plan_period_id:
             query = query.filter(lambda a: a.plan_period.id == plan_period_id)
-        
-        appointments = list(query)
-        return [schemas.Appointment.model_validate(a) for a in appointments]
+
+        return [schemas.Appointment.model_validate(a) for a in query]
         
     @staticmethod
     @db_session
@@ -120,7 +110,7 @@ class AppointmentService:
                 value=date_str
             )
         
-        appointments = list(DBAppointment.select(lambda a: a.date == appointment_date).order_by(lambda a: a.start_time))
+        appointments = DBAppointment.select(lambda a: a.date == appointment_date).order_by(lambda a: a.start_time)
         return [schemas.AppointmentDetail.model_validate(a) for a in appointments]
     
     @staticmethod
@@ -164,9 +154,7 @@ class AppointmentService:
                 value=f"{year}-{month}"
             )
         
-        appointments = list(DBAppointment.select(
-            lambda a: a.date >= start_date and a.date <= end_date
-        ))
+        appointments = DBAppointment.select( lambda a: a.date >= start_date and a.date <= end_date)
         
         return [schemas.Appointment.model_validate(a) for a in appointments]
     

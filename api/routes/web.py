@@ -2,13 +2,14 @@ from datetime import date
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Request, Query, HTTPException, Depends
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Request, Query, HTTPException, Depends, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from api.services import CalendarService, AppointmentService, LocationService, PersonService, PlanService
 from api.templates import templates
 from api.auth.cookie_auth import require_web_employee, get_current_user_from_cookie
 from api.auth.models import User
+from api.auth.roles import Role
 
 router = APIRouter()
 
@@ -216,7 +217,7 @@ async def plans(
     )
 
 
-@router.get("/plans/{plan_id}", response_class=HTMLResponse)
+@router.get("/view-plan/{plan_id}", response_class=HTMLResponse)
 async def plan_detail(
     request: Request, 
     plan_id: UUID,
@@ -261,14 +262,13 @@ async def locations(
         }
     )
 
-
-@router.get("/locations/{location_id}", response_class=HTMLResponse)
-async def location_detail(
-    request: Request, 
+# Komplett neuer Ansatz mit Query-Parameter statt Path-Parameter
+@router.get("/view-location/{location_id}", response_class=HTMLResponse)
+async def view_location_details(
+    request: Request,
     location_id: UUID,
     user: Optional[User] = Depends(require_web_employee)
 ):
-    """Detailseite für einen Arbeitsort."""
     
     # LocationService und AppointmentService nutzen
     location_service = LocationService()
@@ -276,12 +276,14 @@ async def location_detail(
     
     # Arbeitsort aus dem Service laden
     location_detail = location_service.get_location(location_id)
+    print(f'Debug view_location_by_query: {location_detail=}')
     if not location_detail:
         raise HTTPException(status_code=404, detail="Arbeitsort nicht gefunden")
     
     # Termine für diesen Ort laden
     future_appointments_data = appointment_service.get_future_appointments_for_location(location_id)
     past_appointments_data = appointment_service.get_past_appointments_for_location(location_id)
+    print(f'Debug: Query route {past_appointments_data=}\n{future_appointments_data=}')
     
     # Template rendern
     return templates.TemplateResponse(

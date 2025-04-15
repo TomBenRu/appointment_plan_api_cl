@@ -2,29 +2,6 @@
 
 {% block title %}Termin- und Einsatzplanung - Startseite{% endblock %}
 
-{% block head %}
-<style>
-    .card-hover {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px -5px rgba(82, 0, 255, 0.2);
-    }
-    
-    .feature-icon {
-        height: 3rem;
-        width: 3rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background-color: rgba(139, 92, 246, 0.1);
-        border-radius: 0.75rem;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="py-12">
     <!-- Hero Section -->
@@ -36,7 +13,7 @@
     <!-- Main Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-6xl mx-auto px-4">
         <!-- Terminkalender Card -->
-        <a href="/calendar" class="block bg-dark-800 rounded-xl border border-primary-700 overflow-hidden shadow-xl card-hover">
+        <a href="/calendar" class="landing-card-hover block bg-dark-800 rounded-xl border border-primary-700 overflow-hidden shadow-xl">
             <div class="p-8">
                 <div class="flex items-center mb-4">
                     <div class="feature-icon mr-4 text-primary-400">
@@ -80,7 +57,7 @@
         </a>
         
         <!-- Einsatzplanung Card -->
-        <a href="/planning" class="block bg-dark-800 rounded-xl border border-primary-700 overflow-hidden shadow-xl card-hover">
+        <a href="/planning" class="landing-card-hover block bg-dark-800 rounded-xl border border-primary-700 overflow-hidden shadow-xl">
             <div class="p-8">
                 <div class="flex items-center mb-4">
                     <div class="feature-icon mr-4 text-primary-400">

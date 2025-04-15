@@ -74,6 +74,26 @@
     background-color: var(--primary-800);
 }
 
+/* Landing Page Styles */
+.card-hover, .landing-card-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover, .landing-card-hover:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 25px -5px rgba(82, 0, 255, 0.2);
+}
+
+.feature-icon {
+    height: 3rem;
+    width: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(139, 92, 246, 0.1);
+    border-radius: 0.75rem;
+}
+
 /* Animation für Seitenwechsel */
 .page-transition {
     animation: fadeIn 0.3s ease-in-out;

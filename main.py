@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # API-Routen einbinden
-app.include_router(api_router)
+app.include_router(api_router, prefix="/api")
 
 # Web-Routen einbinden
 app.include_router(web_router)

@@ -217,7 +217,7 @@ async def plans(
     )
 
 
-@router.get("/view-plan/{plan_id}", response_class=HTMLResponse)
+@router.get("/plans/{plan_id}", response_class=HTMLResponse)
 async def plan_detail(
     request: Request, 
     plan_id: UUID,
@@ -263,7 +263,7 @@ async def locations(
     )
 
 # Komplett neuer Ansatz mit Query-Parameter statt Path-Parameter
-@router.get("/view-location/{location_id}", response_class=HTMLResponse)
+@router.get("/locations/{location_id}", response_class=HTMLResponse)
 async def view_location_details(
     request: Request,
     location_id: UUID,

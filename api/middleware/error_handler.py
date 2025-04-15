@@ -71,14 +71,11 @@ async def exception_handler(request: Request, exc: Exception):
     # Prüfen, welche Art von Anfrage vorliegt
     is_web_request = _is_web_request(request)
     is_htmx_request = _is_htmx_request(request)
-    print(f"Debug exception_handler: is_web_request={is_web_request}, is_htmx_request={is_htmx_request}")
     
     # Bei HTTPException (inkl. 401/403 für Auth)
     if isinstance(exc, HTTPException):
-        print(f"Debug exception_handler: HTTPException status_code={exc.status_code}, detail={exc.detail}")
         # Authorization-Fehler speziell behandeln
         if exc.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN):
-            print(f"Debug exception_handler: Auth error, state={request.state}")
             # Für normale Web-Anfragen
             if is_web_request and not is_htmx_request:
                 # Login-Modal anzeigen (der Status ist bereits in der Request gespeichert)

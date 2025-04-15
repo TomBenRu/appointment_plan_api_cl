@@ -15,7 +15,7 @@ api_router = APIRouter()
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
 
 # Web-Auth-Router ohne Abhängigkeiten
-api_router.include_router(web_auth_router, prefix="/auth", tags=["web-auth"])
+web_router.include_router(web_auth_router, prefix="/auth", tags=["web-auth"])
 
 # API-Routen mit Rollenabhängigkeit (employee)
 api_router.include_router(

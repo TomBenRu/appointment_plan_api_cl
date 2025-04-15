@@ -276,14 +276,12 @@ async def view_location_details(
     
     # Arbeitsort aus dem Service laden
     location_detail = location_service.get_location(location_id)
-    print(f'Debug view_location_by_query: {location_detail=}')
     if not location_detail:
         raise HTTPException(status_code=404, detail="Arbeitsort nicht gefunden")
     
     # Termine für diesen Ort laden
     future_appointments_data = appointment_service.get_future_appointments_for_location(location_id)
     past_appointments_data = appointment_service.get_past_appointments_for_location(location_id)
-    print(f'Debug: Query route {past_appointments_data=}\n{future_appointments_data=}')
     
     # Template rendern
     return templates.TemplateResponse(

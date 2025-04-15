@@ -26,7 +26,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(api_router, prefix="/api")
 
 # Web-Routen einbinden
-app.include_router(web_router)
+app.include_router(web_router, tags=["web"])
 
 # Planning-Routen einbinden
 app.include_router(planning_router)

@@ -16,11 +16,9 @@ class DebugRoute(APIRoute):
         original_route_handler = super().get_route_handler()
         
         async def custom_route_handler(request: Request) -> Response:
-            print(f"Debug DebugRoute: handling request to {request.url.path}")
             try:
                 return await original_route_handler(request)
             except Exception as exc:
-                print(f"Debug DebugRoute: caught exception: {type(exc)}, {str(exc)}")
                 traceback_str = ''.join(traceback.format_exception(type(exc), exc, exc.__traceback__))
                 logger.error(f"Exception in route {request.url.path}:\n{traceback_str}")
                 raise

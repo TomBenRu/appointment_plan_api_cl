@@ -7,6 +7,7 @@ from .locations import router as locations_router
 from .auth import router as auth_router
 from .web_auth import router as web_auth_router
 from .web import router as web_router
+from .planning import router as planning_router
 
 api_router = APIRouter()
 
@@ -36,4 +37,4 @@ api_router.include_router(
     dependencies=[Depends(require_employee)]
 )
 
-__all__ = ['api_router', 'web_router']
+__all__ = ['api_router', 'web_router', 'planning_router']

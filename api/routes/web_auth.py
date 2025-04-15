@@ -10,6 +10,7 @@ from api.exceptions.auth import AuthenticationException
 
 router = APIRouter()
 
+
 @router.post("/web-token", response_class=HTMLResponse)
 async def login_web_form(
     request: Request, 
@@ -30,6 +31,7 @@ async def login_web_form(
         )
     
     # Token erstellen und als Cookie setzen
+    print(f'Debug: {user}')
     access_token_expires = timedelta(minutes=60)  # Längere Gültigkeit für Web-Sessions
     access_token = create_access_token(
         data={"sub": user.username, "role": user.role.value, "person_id": str(user.person_id)},

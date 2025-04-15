@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse
 
 from api.services import CalendarService, AppointmentService, LocationService, PersonService, PlanService
 from api.templates import templates
-from api.auth.cookie_auth import require_web_employee, get_current_user_from_cookie, require_web_guest
+from api.auth.cookie_auth import require_web_employee, get_current_user_from_cookie
 from api.auth.models import User
 
 router = APIRouter()
@@ -15,14 +15,35 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 async def index(
+    request: Request,
+    user: Optional[User] = Depends(require_web_employee)
+):
+    """Homepage mit Landing-Page."""
+    # Prüfen, ob login_modal angezeigt werden soll
+    show_login_modal = getattr(request.state, "show_login_modal", False)
+    required_role = getattr(request.state, "required_role", None)
+
+    # Template rendern
+    return templates.TemplateResponse(
+        "landing_page.html",
+        {
+            "request": request,
+            "show_login_modal": show_login_modal,
+            "required_role": required_role,
+            "user": user
+        }
+    )
+
+@router.get("/calendar", response_class=HTMLResponse)
+async def calendar_index(
     request: Request, 
-    user: Optional[User] = Depends(require_web_guest),
+    user: Optional[User] = Depends(require_web_employee),
     year: Optional[int] = Query(None),
     month: Optional[int] = Query(None),
     filter_person_id: Optional[str] = Query(None), 
     filter_location_id: Optional[str] = Query(None)
 ):
-    """Homepage mit Kalenderansicht."""
+    """Kalenderansicht."""
     # Initialisiere den CalendarService
     calendar_service = CalendarService()
     
@@ -85,7 +106,7 @@ async def index(
 @router.get("/hx/calendar-partial", response_class=HTMLResponse)
 async def calendar_partial(
     request: Request,
-    user: Optional[User] = Depends(require_web_guest),
+    user: Optional[User] = Depends(require_web_employee),
     direction: str = Query(None, description="Richtung (prev/next/today)"),
     year: int = Query(None, description="Jahr"),
     month: int = Query(None, description="Monat (1-12)"),
@@ -150,7 +171,7 @@ async def calendar_partial(
 async def day_view_modal(
     request: Request, 
     date_str: str,
-    user: Optional[User] = Depends(require_web_guest)
+    user: Optional[User] = Depends(require_web_employee)
 ):
     """Liefert das Modal-Fragment für die Tagesansicht."""
     # Initialisiere den CalendarService
@@ -177,7 +198,7 @@ async def day_view_modal(
 @router.get("/plans", response_class=HTMLResponse)
 async def plans(
     request: Request,
-    user: Optional[User] = Depends(require_web_guest)
+    user: Optional[User] = Depends(require_web_employee)
 ):
     """Seite mit Plänen."""
     # PlanService nutzen, um alle Pläne zu laden
@@ -199,7 +220,7 @@ async def plans(
 async def plan_detail(
     request: Request, 
     plan_id: UUID,
-    user: Optional[User] = Depends(require_web_guest)
+    user: Optional[User] = Depends(require_web_employee)
 ):
     """Detailseite für einen Plan."""
     # PlanService nutzen, um Plandetails zu laden
@@ -223,7 +244,7 @@ async def plan_detail(
 @router.get("/locations", response_class=HTMLResponse)
 async def locations(
     request: Request,
-    user: Optional[User] = Depends(require_web_guest)
+    user: Optional[User] = Depends(require_web_employee)
 ):
     """Seite mit Arbeitsorten."""
     # LocationService nutzen, um alle Arbeitsorte zu laden
@@ -245,7 +266,7 @@ async def locations(
 async def location_detail(
     request: Request, 
     location_id: UUID,
-    user: Optional[User] = Depends(require_web_guest)
+    user: Optional[User] = Depends(require_web_employee)
 ):
     """Detailseite für einen Arbeitsort."""
     
@@ -278,7 +299,7 @@ async def location_detail(
 @router.get("/persons", response_class=HTMLResponse)
 async def persons(
     request: Request,
-    user: Optional[User] = Depends(require_web_guest)
+    user: Optional[User] = Depends(require_web_employee)
 ):
     """Seite mit allen Personen."""
     
@@ -301,7 +322,7 @@ async def persons(
 async def appointment_detail_modal(
     request: Request, 
     appointment_id: UUID,
-    user: Optional[User] = Depends(require_web_guest)
+    user: Optional[User] = Depends(require_web_employee)
 ):
     """Liefert das Modal-Fragment für Termindetails."""
     
@@ -325,7 +346,7 @@ async def appointment_detail_modal(
 @router.get("/hx/close-modal", response_class=HTMLResponse)
 async def close_modal(
     request: Request,
-    user: Optional[User] = Depends(require_web_guest)
+    user: Optional[User] = Depends(require_web_employee)
 ):
     """Schließt das Modal, indem ein leerer String zurückgegeben wird."""
     return ""
@@ -334,7 +355,7 @@ async def close_modal(
 async def person_detail(
     request: Request, 
     person_id: UUID,
-    user: Optional[User] = Depends(require_web_guest)
+    user: Optional[User] = Depends(require_web_employee)
 ):
     """Detailseite für eine Person."""
     
@@ -367,7 +388,7 @@ async def person_detail(
 @router.get("/search", response_class=HTMLResponse)
 async def search(
     request: Request,
-    user: Optional[User] = Depends(require_web_guest),
+    user: Optional[User] = Depends(require_web_employee),
     q: str = Query(..., description="Suchbegriff"),
     type: Optional[str] = Query(None, description="Entitätstyp (appointment, person, location)")
 ):

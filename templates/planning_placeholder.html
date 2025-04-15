@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Einsatzplanung{% endblock %}
+
+{% block content %}
+<div class="py-8">
+    <div class="bg-dark-800 rounded-xl border border-primary-700 p-8 max-w-4xl mx-auto text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-primary-400 mx-auto mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        
+        <h1 class="text-3xl font-bold text-primary-300 mb-4">Einsatzplanung</h1>
+        
+        <p class="text-xl text-gray-300 mb-8">
+            Diese Seite zeigt zukünftig die integrierte Einsatzplanung an.
+        </p>
+        
+        <div class="bg-dark-700 rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-100 mb-4">Kommende Funktionen</h2>
+            
+            <ul class="text-left space-y-3 max-w-lg mx-auto">
+                <li class="flex items-start">
+                    <svg class="h-5 w-5 text-primary-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-gray-200">Team- und Projektverwaltung</span>
+                </li>
+                <li class="flex items-start">
+                    <svg class="h-5 w-5 text-primary-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-gray-200">Verwaltung von Planperioden</span>
+                </li>
+                <li class="flex items-start">
+                    <svg class="h-5 w-5 text-primary-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-gray-200">Verfügbarkeitsmanagement für Mitarbeiter</span>
+                </li>
+                <li class="flex items-start">
+                    <svg class="h-5 w-5 text-primary-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-gray-200">Automatische Erinnerungen für Fristen</span>
+                </li>
+                <li class="flex items-start">
+                    <svg class="h-5 w-5 text-primary-400 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-gray-200">Integration mit dem Terminkalender</span>
+                </li>
+            </ul>
+        </div>
+        
+        <a href="/" class="inline-flex items-center text-primary-400 hover:text-primary-300 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            Zurück zur Startseite
+        </a>
+    </div>
+</div>
+{% endblock %}

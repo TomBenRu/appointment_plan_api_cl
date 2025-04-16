@@ -123,7 +123,7 @@ async def exception_handler(request: Request, exc: Exception):
                             "filter_location_id": None,
                             "all_persons": filter_options["all_persons"],
                             "all_locations": filter_options["all_locations"],
-                            "menu_section": MenuDisplaySection.CALENDAR
+                            "menu_section": MenuDisplaySection.NONE
                         }
                     )
                     return response

@@ -66,7 +66,38 @@ async def logout(request: Request, response: Response):
     """
     response.delete_cookie(key="appointments_token")
     return """
-    <script>
-        window.location.href = "/";
-    </script>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                background-color: #121212; /* Entspricht --dark-900 */
+                margin: 0;
+                padding: 0;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .loader {
+                border: 4px solid #2D2D2D; /* --dark-700 */
+                border-top: 4px solid #7B1CD7; /* --primary-600 */
+                border-radius: 50%;
+                width: 30px;
+                height: 30px;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="loader"></div>
+        <script>
+            window.location.href = "/";
+        </script>
+    </body>
+    </html>
     """

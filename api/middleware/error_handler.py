@@ -28,6 +28,7 @@ from api.exceptions import (
     DuplicatePlanException, PlanValidationException, PlanPeriodOverlapException
 )
 from api.templates import templates  # Importiere die Jinja2-Templates
+from api.utils import MenuDisplaySection
 
 
 def _is_htmx_request(request: Request) -> bool:
@@ -121,7 +122,8 @@ async def exception_handler(request: Request, exc: Exception):
                             "filter_person_id": None,
                             "filter_location_id": None,
                             "all_persons": filter_options["all_persons"],
-                            "all_locations": filter_options["all_locations"]
+                            "all_locations": filter_options["all_locations"],
+                            "menu_section": MenuDisplaySection.CALENDAR
                         }
                     )
                     return response
@@ -307,7 +309,8 @@ async def _render_html_error(
             "status_code": status_code,
             "title": title,
             "message": message,
-            "details": details
+            "details": details,
+            "menu_section": MenuDisplaySection.NONE
         }
     )
     content.status_code = status_code

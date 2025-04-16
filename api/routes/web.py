@@ -10,6 +10,7 @@ from api.templates import templates
 from api.auth.cookie_auth import require_web_employee, get_current_user_from_cookie
 from api.auth.models import User
 from api.auth.roles import Role
+from api.utils import MenuDisplaySection
 
 router = APIRouter()
 
@@ -31,7 +32,8 @@ async def index(
             "request": request,
             "show_login_modal": show_login_modal,
             "required_role": required_role,
-            "user": user
+            "user": user,
+            "menu_section": MenuDisplaySection.NONE
         }
     )
 
@@ -99,7 +101,8 @@ async def calendar_index(
             "all_locations": filter_options["all_locations"],
             "show_login_modal": show_login_modal,
             "required_role": required_role,
-            "user": user
+            "user": user,
+            "menu_section": MenuDisplaySection.CALENDAR
         }
     )
 
@@ -212,7 +215,8 @@ async def plans(
         {
             "request": request,
             "plans": plans_data,
-            "user": user
+            "user": user,
+            "menu_section": MenuDisplaySection.CALENDAR
         }
     )
 
@@ -237,7 +241,8 @@ async def plan_detail(
         {
             "request": request,
             "plan": plan_detail,
-            "user": user
+            "user": user,
+            "menu_section": MenuDisplaySection.CALENDAR
         }
     )
 
@@ -258,7 +263,8 @@ async def locations(
         {
             "request": request,
             "locations": locations_data,
-            "user": user
+            "user": user,
+            "menu_section": MenuDisplaySection.CALENDAR
         }
     )
 
@@ -291,7 +297,8 @@ async def view_location_details(
             "location": location_detail,
             "future_appointments": future_appointments_data,
             "past_appointments": past_appointments_data,
-            "user": user
+            "user": user,
+            "menu_section": MenuDisplaySection.CALENDAR
         }
     )
 
@@ -313,7 +320,8 @@ async def persons(
         {
             "request": request,
             "persons": persons_data,
-            "user": user
+            "user": user,
+            "menu_section": MenuDisplaySection.CALENDAR
         }
     )
 
@@ -380,7 +388,8 @@ async def person_detail(
             "person": person_detail,
             "future_appointments": future_appointments_data,
             "past_appointments": past_appointments_data,
-            "user": user
+            "user": user,
+            "menu_section": MenuDisplaySection.CALENDAR
         }
     )
 
@@ -430,6 +439,7 @@ async def search(
             "type": type,
             "results": results,
             "total_count": len(results["appointments"]) + len(results["persons"]) + len(results["locations"]),
-            "user": user
+            "user": user,
+            "menu_section": MenuDisplaySection.CALENDAR
         }
     )

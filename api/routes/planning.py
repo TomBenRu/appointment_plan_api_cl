@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse
 from api.auth.cookie_auth import require_web_employee
 from api.auth.models import User
 from api.templates import templates
+from api.utils import MenuDisplaySection
 from typing import Optional
 
 router = APIRouter(prefix="/planning", tags=["planning"])
@@ -18,6 +19,7 @@ async def planning_index(
         "planning_placeholder.html",
         {
             "request": request,
-            "user": user
+            "user": user,
+            "menu_section": MenuDisplaySection.PLANNING
         }
     )

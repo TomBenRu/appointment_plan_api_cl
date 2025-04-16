@@ -39,39 +39,11 @@
                     </button>
                 </div>
                 
-                <!-- Suchleiste -->
-                <div class="lg:w-2/5">
-                    <form action="/search" method="GET" class="flex">
-                        <div class="relative flex-1">
-                            <input 
-                                type="text" 
-                                name="q" 
-                                placeholder="Suchen..." 
-                                class="w-full bg-dark-700 text-white border border-dark-600 focus:border-primary-500 rounded-l-lg px-4 py-2 pl-10 focus:outline-none"
-                            >
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <button type="submit" class="bg-primary-700 hover:bg-primary-600 text-white px-4 rounded-r-lg transition-colors duration-200">
-                            <span class="sr-only">Suchen</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
-                        </button>
-                    </form>
-                </div>
+                {# Dynamisch eingebundene Menükomponenten für Desktop #}
+                {% include menu_section.value.desktop %}
                 
-                <!-- Navigation -->
-                <nav class="lg:flex items-center hidden space-x-1">
-                    <a href="/" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Kalender</a>
-                    <a href="/plans" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Pläne</a>
-                    <a href="/locations" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Arbeitsorte</a>
-                    <a href="/persons" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Personen</a>
-                    
-                    <!-- Login/Logout-Button -->
+                {# Login/Logout-Button wird immer angezeigt, unabhängig vom Menübereich #}
+                <nav class="lg:flex items-center hidden">
                     {% if user %}
                     <a href="/auth/logout" class="ml-4 px-4 py-2 bg-primary-800 text-primary-100 hover:bg-primary-700 rounded-md transition-all duration-200 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,26 +68,22 @@
             
             <!-- Mobile Navigation (ausgeblendet auf Desktop) -->
             <nav class="lg:hidden mt-4 pb-2 hidden" id="mobile-menu">
-                <div class="flex flex-col space-y-2">
-                    <a href="/" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Kalender</a>
-                    <a href="/plans" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Pläne</a>
-                    <a href="/locations" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Arbeitsorte</a>
-                    <a href="/persons" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Personen</a>
-                    
-                    <!-- Login/Logout-Button (Mobile) -->
-                    {% if user %}
-                    <a href="/auth/logout" class="px-4 py-2 bg-primary-800 text-primary-100 hover:bg-primary-700 rounded-md transition-all duration-200">
-                        Abmelden
-                    </a>
-                    {% else %}
-                    <button 
-                        class="px-4 py-2 bg-primary-800 text-primary-100 hover:bg-primary-700 rounded-md transition-all duration-200"
-                        onclick="document.getElementById('login-modal').classList.remove('hidden');"
-                    >
-                        Anmelden
-                    </button>
-                    {% endif %}
-                </div>
+                {# Dynamisch eingebundenes mobiles Menü #}
+                {% include menu_section.value.mobile %}
+                
+                <!-- Login/Logout-Button (Mobile) -->
+                {% if user %}
+                <a href="/auth/logout" class="px-4 py-2 bg-primary-800 text-primary-100 hover:bg-primary-700 rounded-md transition-all duration-200">
+                    Abmelden
+                </a>
+                {% else %}
+                <button 
+                    class="px-4 py-2 bg-primary-800 text-primary-100 hover:bg-primary-700 rounded-md transition-all duration-200"
+                    onclick="document.getElementById('login-modal').classList.remove('hidden');"
+                >
+                    Anmelden
+                </button>
+                {% endif %}
             </nav>
         </div>
     </header>

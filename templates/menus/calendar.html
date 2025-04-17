@@ -2,7 +2,7 @@
 
 {# Suchleiste für den Kalenderbereich #}
 <div class="lg:w-2/5">
-    <form action="/search" method="GET" class="flex">
+    <form action="/calendar/search" method="GET" class="flex">
         <div class="relative flex-1">
             <input 
                 type="text" 
@@ -28,6 +28,7 @@
 {# Navigation für den Kalenderbereich - Desktop #}
 <nav class="lg:flex items-center hidden space-x-1">
     <a href="/calendar" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Kalender</a>
-    <a href="/plans" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Pläne</a>
-    <a href="/locations" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Arbeitsorte</a>
-    <a href="/persons" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Personen</a>
+    <a href="/calendar/plans" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Pläne</a>
+    <a href="/calendar/locations" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Arbeitsorte</a>
+    <a href="/calendar/persons" class="px-4 py-2 hover:bg-primary-900 hover:text-primary-200 rounded-md transition-all duration-200">Personen</a>
+</nav>

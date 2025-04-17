@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from api.routes import api_router, web_router, planning_router
+from api.routes import api_router, web_router
 from database import setup_database
 from api.middleware.error_handler import register_exception_handlers
 
@@ -25,11 +25,8 @@ app = FastAPI(lifespan=lifespan)
 # API-Routen einbinden
 app.include_router(api_router, prefix="/api")
 
-# Web-Routen einbinden
+# Web-Routen einbinden (beinhaltet jetzt auch die Planning-Routen)
 app.include_router(web_router, tags=["web"])
-
-# Planning-Routen einbinden
-app.include_router(planning_router)
 
 # Statische Dateien
 app.mount("/static", StaticFiles(directory="static"), name="static")

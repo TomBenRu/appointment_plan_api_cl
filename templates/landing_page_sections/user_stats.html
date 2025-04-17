@@ -1,0 +1,31 @@
+{% if user %}
+<div class="bg-dark-800 rounded-xl border border-dark-600 max-w-6xl mx-auto p-8">
+    <h2 class="text-2xl font-bold text-primary-300 mb-6 text-center">Deine Übersicht</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="bg-dark-700 rounded-lg p-4 text-center">
+            <h3 class="text-lg font-semibold text-gray-100 mb-2">Termine</h3>
+            <p class="text-3xl font-bold text-primary-400">12</p>
+            <p class="text-gray-400 text-sm">in den nächsten 30 Tagen</p>
+        </div>
+        
+        <div class="bg-dark-700 rounded-lg p-4 text-center">
+            <h3 class="text-lg font-semibold text-gray-100 mb-2">Planperioden</h3>
+            <p class="text-3xl font-bold text-primary-400">3</p>
+            <p class="text-gray-400 text-sm">aktive Zeiträume</p>
+        </div>
+        
+        <div class="bg-dark-700 rounded-lg p-4 text-center">
+            <h3 class="text-lg font-semibold text-gray-100 mb-2">Verfügbarkeiten</h3>
+            <p class="text-3xl font-bold text-primary-400">6</p>
+            <p class="text-gray-400 text-sm">ausstehende Eingaben</p>
+        </div>
+        
+        <div class="bg-dark-700 rounded-lg p-4 text-center">
+            <h3 class="text-lg font-semibold text-gray-100 mb-2">Teams</h3>
+            <p class="text-3xl font-bold text-primary-400">2</p>
+            <p class="text-gray-400 text-sm">aktive Mitgliedschaften</p>
+        </div>
+    </div>
+</div>
+{% endif %}

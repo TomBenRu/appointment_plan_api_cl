@@ -1,7 +1,7 @@
 """
 Middleware zur Behandlung von Exceptions.
 """
-from fastapi import Request, status, HTTPException
+from fastapi import Request, status, HTTPException, FastAPI
 from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
 from fastapi.exceptions import RequestValidationError
 from pony.orm.core import ObjectNotFound
@@ -383,7 +383,7 @@ def _get_error_title(status_code: int) -> str:
     return titles.get(status_code, "Fehler")
 
 
-def register_exception_handlers(app):
+def register_exception_handlers(app: FastAPI):
     """
     Registriert alle Exception-Handler bei der FastAPI-Anwendung.
     

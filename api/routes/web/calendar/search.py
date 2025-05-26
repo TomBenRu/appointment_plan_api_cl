@@ -12,7 +12,7 @@ from api.utils import MenuDisplaySection
 router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
-async def search(
+def search(
     request: Request,
     user: Optional[User] = Depends(require_web_employee),
     q: str = Query(..., description="Suchbegriff"),

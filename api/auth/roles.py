@@ -3,6 +3,7 @@ from enum import Enum
 class Role(str, Enum):
     """Benutzerrollen im System."""
     GUEST = "guest"
+    APPRENTICE = "apprentice"
     EMPLOYEE = "employee"
     DISPATCHER = "dispatcher"
     ADMIN = "admin"
@@ -16,9 +17,10 @@ class Role(str, Enum):
         """
         role_hierarchy = {
             cls.GUEST: 1,
-            cls.EMPLOYEE: 2,
-            cls.DISPATCHER: 3,
-            cls.ADMIN: 4,
-            cls.SUPERVISOR: 5
+            cls.APPRENTICE: 2,
+            cls.EMPLOYEE: 3,
+            cls.DISPATCHER: 4,
+            cls.ADMIN: 5,
+            cls.SUPERVISOR: 6
         }
         return role_hierarchy.get(user_role, 0) >= role_hierarchy.get(required_role, 0)

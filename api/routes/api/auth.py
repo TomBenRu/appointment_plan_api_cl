@@ -12,7 +12,7 @@ from api.exceptions.auth import AuthenticationException
 router = APIRouter()
 
 @router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     Endpoint zum Abrufen eines Access-Tokens.
     """
@@ -31,7 +31,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/register", response_model=User)
-async def register_user(user_data: UserCreate, current_user: User = Depends(require_admin)):
+def register_user(user_data: UserCreate, current_user: User = Depends(require_admin)):
     """
     Registriert einen neuen Benutzer.
     Nur Administratoren können neue Benutzer registrieren.
@@ -39,7 +39,7 @@ async def register_user(user_data: UserCreate, current_user: User = Depends(requ
     return AuthService.create_user(user_data)
 
 @router.get("/me", response_model=User)
-async def read_users_me(current_user: User = Depends(require_employee)):
+def read_users_me(current_user: User = Depends(require_employee)):
     """
     Gibt den aktuellen Benutzer zurück.
     """

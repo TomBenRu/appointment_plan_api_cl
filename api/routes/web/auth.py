@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.post("/web-token", response_class=HTMLResponse)
-async def login_web_form(
+def login_web_form(
     request: Request, 
     response: Response,
     username: str = Form(...), 
@@ -60,7 +60,7 @@ async def login_web_form(
     """
 
 @router.get("/logout", response_class=HTMLResponse)
-async def logout(request: Request, response: Response):
+def logout(request: Request, response: Response):
     """
     Löscht das Authentifizierungs-Cookie und leitet zurück zur Startseite.
     """

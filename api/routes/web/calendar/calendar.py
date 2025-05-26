@@ -14,7 +14,7 @@ from api.utils import MenuDisplaySection
 router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
-async def calendar_index(
+def calendar_index(
     request: Request, 
     user: Optional[User] = Depends(require_web_employee),
     year: Optional[int] = Query(None),
@@ -84,7 +84,7 @@ async def calendar_index(
 
 
 @router.get("/hx/calendar-partial", response_class=HTMLResponse)
-async def calendar_partial(
+def calendar_partial(
     request: Request,
     user: Optional[User] = Depends(require_web_employee),
     direction: str = Query(None, description="Richtung (prev/next/today)"),
@@ -148,7 +148,7 @@ async def calendar_partial(
 
 
 @router.get("/hx/day-view/{date_str}", response_class=HTMLResponse)
-async def day_view_modal(
+def day_view_modal(
     request: Request, 
     date_str: str,
     user: Optional[User] = Depends(require_web_employee)
@@ -175,7 +175,7 @@ async def day_view_modal(
     )
 
 @router.get("/hx/appointments/{appointment_id}/detail", response_class=HTMLResponse)
-async def appointment_detail_modal(
+def appointment_detail_modal(
     request: Request, 
     appointment_id: UUID,
     user: Optional[User] = Depends(require_web_employee)
@@ -200,7 +200,7 @@ async def appointment_detail_modal(
     )
 
 @router.get("/hx/close-modal", response_class=HTMLResponse)
-async def close_modal(
+def close_modal(
     request: Request,
     user: Optional[User] = Depends(require_web_employee)
 ):

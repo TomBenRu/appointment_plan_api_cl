@@ -13,7 +13,7 @@ from api.utils import MenuDisplaySection
 router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
-async def plans(
+def plans(
     request: Request,
     user: Optional[User] = Depends(require_web_employee)
 ):
@@ -34,7 +34,7 @@ async def plans(
     )
 
 @router.get("/{plan_id}", response_class=HTMLResponse)
-async def plan_detail(
+def plan_detail(
     request: Request, 
     plan_id: UUID,
     user: Optional[User] = Depends(require_web_employee)

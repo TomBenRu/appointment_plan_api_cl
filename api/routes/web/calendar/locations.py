@@ -13,7 +13,7 @@ from api.utils import MenuDisplaySection
 router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
-async def locations(
+def locations(
     request: Request,
     user: Optional[User] = Depends(require_web_employee)
 ):
@@ -34,7 +34,7 @@ async def locations(
     )
 
 @router.get("/{location_id}", response_class=HTMLResponse)
-async def view_location_details(
+def view_location_details(
     request: Request,
     location_id: UUID,
     user: Optional[User] = Depends(require_web_employee)
